@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>CO₂ e O₂ - Disegna e Inserisci Specie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #eef1f5;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #sidebar {
+      width: 320px;
+      background: #ffffff;
+      padding: 20px;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    #map {
+      flex: 1;
+      margin: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 12px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #utente-loggato {
+      font-size: 0.9em;
+      color: green;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <!-- Sidebar sinistra -->
+  <div id="sidebar">
+    <h3>Accesso Utente</h3>
+    <label>Email o nome:</label>
+    <input type="text" id="utente" placeholder="es. mario.rossi@example.com">
+    <button onclick="accediUtente()">Accedi</button>
+    <div id="utente-loggato"></div>
+
+    <label>Via o indirizzo:</label>
+    <input type="text" id="indirizzo" placeholder="es. Via Roma, Milano">
+    <button onclick="vaiAllaPosizione()">Vai alla posizione</button>
+
+    <h3>Specie Vegetali</h3>
+    <label>Specie vegetale:</label>
+    <input type="text" id="specie" placeholder="es. quercia">
+
+    <label>Quantità o area:</label>
+    <input type="text" id="quantita" placeholder="es. 50 o 300 m²">
+
+    <button onclick="salvaDati()">Salva terreno</button>
+  </div>
+
+  <!-- Mappa destra -->
+  <div id="map"></div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script>
+  const map = L.map('map').setView([42.5, 12.5], 6);
+
+  // Mappa in italiano e più colorata (OSM France)
+  L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors, Tiles courtesy of OSM France',
+    subdomains: 'abc',
+    maxZoom: 20
+  }).addTo(map);
+
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+
+  const drawControl = new L.Control.Draw({
+    draw: {
+      polygon: {
+        allowIntersection: false,
+        showArea: true,
+        shapeOptions: {
+          color: "#2e7d32",
+          weight: 3,
+          opacity: 1,
+          fillColor: "#81c784",
+          fillOpacity: 0.5
+        }
+      },
+      polyline: false,
+      rectangle: false,
+      circle: false,
+      marker: false,
+      circlemarker: false
+    },
+    edit: { featureGroup: drawnItems }
+  });
+  map.addControl(drawControl);
+
+  const stilePoligono = {
+    color: "#2e7d32",
+    weight: 3,
+    opacity: 1,
+    fillColor: "#81c784",
+    fillOpacity: 0.5
+  };
+
+  let terreni = [];
+  let poligonoCorrente = null;
+  let utenteAttivo = null;
+  let markerIndirizzo = null;
+
+  map.on(L.Draw.Event.CREATED, function (e) {
+    poligonoCorrente = e.layer;
+    poligonoCorrente.setStyle(stilePoligono);
+    drawnItems.addLayer(poligonoCorrente);
+    alert("Poligono disegnato. Ora inserisci le specie e salva.");
+  });
+
+  function accediUtente() {
+    const email = document.getElementById("utente").value.trim();
+    if (!email) {
+      alert("Inserisci un indirizzo email valido.");
+      return;
+    }
+    utenteAttivo = email;
+    document.getElementById("utente-loggato").innerText = `Utente attivo: ${utenteAttivo}`;
+    alert("Accesso effettuato!");
+  }
+
+  function salvaDati() {
+    const specie = document.getElementById("specie").value.trim();
+    const quantita = document.getElementById("quantita").value.trim();
+
+    if (!utenteAttivo) {
+      alert("Devi prima accedere con email.");
+      return;
+    }
+
+    if (!specie || !quantita || !poligonoCorrente) {
+      alert("Compila tutti i campi e disegna un poligono prima di salvare.");
+      return;
+    }
+
+    const coords = poligonoCorrente.getLatLngs();
+
+    poligonoCorrente.bindPopup(
+      `<strong>Specie:</strong> ${specie}<br><strong>Quantità:</strong> ${quantita}`
+    );
+
+    terreni.push({
+      utente: utenteAttivo,
+      specie,
+      quantita,
+      coordinate: coords
+    });
+
+    console.log("Terreni salvati:", terreni);
+
+    document.getElementById("specie").value = "";
+    document.getElementById("quantita").value = "";
+    poligonoCorrente = null;
+    alert("Terreno salvato!");
+  }
+
+  function vaiAllaPosizione() {
+    const indirizzo = document.getElementById("indirizzo").value.trim();
+    if (!indirizzo) {
+      alert("Inserisci un indirizzo valido.");
+      return;
+    }
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(indirizzo)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length === 0) {
+          alert("Indirizzo non trovato.");
+          return;
+        }
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        map.setView([lat, lon], 16);
+
+        if (markerIndirizzo) {
+          map.removeLayer(markerIndirizzo);
+        }
+
+        markerIndirizzo = L.marker([lat, lon]).addTo(map)
+          .bindPopup("Indirizzo trovato: " + indirizzo)
+          .openPopup();
+      })
+      .catch(error => {
+        alert("Errore nella ricerca dell'indirizzo.");
+        console.error(error);
+      });
+  }
+</script>
+
+</body>
+</html>

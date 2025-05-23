@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>CO₂ e O₂ - Disegna e Inserisci Specie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+</head>
+<body class="h-screen w-screen font-sans">
+<div class="flex h-full">
+  <!-- Sidebar -->
+  <aside class="w-80 bg-gray-100 p-6 border-r border-gray-300 overflow-y-auto">
+    <h2 class="text-xl font-semibold mb-4">Accesso Utente</h2>
+    <label class="block text-sm font-medium">Email o nome</label>
+    <input type="text" id="utente" placeholder="es. mario.rossi@example.com" class="w-full mt-1 mb-4 p-2 border rounded"/>
+    <button onclick="accediUtente()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">Accedi</button>
+    <p id="utente-loggato" class="text-sm text-green-600 mt-2"></p>
+
+    <label class="block mt-6 text-sm font-medium">Via o indirizzo</label>
+    <input type="text" id="indirizzo" placeholder="es. Via Roma, Milano" class="w-full mt-1 mb-2 p-2 border rounded"/>
+    <button onclick="vaiAllaPosizione()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">Vai alla posizione</button>
+
+    <h2 class="text-xl font-semibold mt-6 mb-4">Specie Vegetali</h2>
+    <label class="block text-sm font-medium">Specie vegetale</label>
+    <input type="text" id="specie" placeholder="es. quercia" class="w-full mt-1 mb-4 p-2 border rounded"/>
+
+    <label class="block text-sm font-medium">Quantità o area</label>
+    <input type="text" id="quantita" placeholder="es. 50 o 300 m²" class="w-full mt-1 mb-4 p-2 border rounded"/>
+
+    <button onclick="salvaDati()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">Salva terreno</button>
+  </aside>
+
+  <!-- Mappa -->
+  <div id="map" class="flex-1"></div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script>
+  const map = L.map('map').setView([42.5, 12.5], 6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CartoDB',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
+
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+
+  const drawControl = new L.Control.Draw({
+    draw: {
+      polygon: {
+        allowIntersection: false,
+        showArea: true,
+        shapeOptions: {
+          color: "#2e7d32",
+          weight: 3,
+          opacity: 1,
+          fillColor: "#81c784",
+          fillOpacity: 0.5
+        }
+      },
+      polyline: false,
+      rectangle: false,
+      circle: false,
+      marker: false,
+      circlemarker: false
+    },
+    edit: { featureGroup: drawnItems }
+  });
+  map.addControl(drawControl);
+
+  const stilePoligono = {
+    color: "#2e7d32",
+    weight: 3,
+    opacity: 1,
+    fillColor: "#81c784",
+    fillOpacity: 0.5
+  };
+
+  let terreni = [];
+  let poligonoCorrente = null;
+  let utenteAttivo = null;
+  let markerIndirizzo = null;
+
+  map.on(L.Draw.Event.CREATED, function (e) {
+    poligonoCorrente = e.layer;
+    poligonoCorrente.setStyle(stilePoligono);
+    drawnItems.addLayer(poligonoCorrente);
+    alert("Poligono disegnato. Ora inserisci le specie e salva.");
+  });
+
+  function accediUtente() {
+    const email = document.getElementById("utente").value.trim();
+    if (!email) {
+      alert("Inserisci un indirizzo email valido.");
+      return;
+    }
+    utenteAttivo = email;
+    document.getElementById("utente-loggato").innerText = `Utente attivo: ${utenteAttivo}`;
+    alert("Accesso effettuato!");
+  }
+
+  function salvaDati() {
+    const specie = document.getElementById("specie").value.trim();
+    const quantita = document.getElementById("quantita").value.trim();
+
+    if (!utenteAttivo) {
+      alert("Devi prima accedere con email.");
+      return;
+    }
+    if (!specie || !quantita || !poligonoCorrente) {
+      alert("Compila tutti i campi e disegna un poligono prima di salvare.");
+      return;
+    }
+
+    const coords = poligonoCorrente.getLatLngs();
+
+    terreni.push({
+      utente: utenteAttivo,
+      specie,
+      quantita,
+      coordinate: coords
+    });
+
+    console.log("Terreni salvati:", terreni);
+
+    document.getElementById("specie").value = "";
+    document.getElementById("quantita").value = "";
+    poligonoCorrente = null;
+    alert("Terreno salvato!");
+  }
+
+  function vaiAllaPosizione() {
+    const indirizzo = document.getElementById("indirizzo").value.trim();
+    if (!indirizzo) {
+      alert("Inserisci un indirizzo valido.");
+      return;
+    }
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(indirizzo)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length === 0) {
+          alert("Indirizzo non trovato.");
+          return;
+        }
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        map.setView([lat, lon], 16);
+
+        if (markerIndirizzo) {
+          map.removeLayer(markerIndirizzo);
+        }
+
+        markerIndirizzo = L.marker([lat, lon]).addTo(map)
+          .bindPopup("Indirizzo trovato: " + indirizzo)
+          .openPopup();
+      })
+      .catch(error => {
+        alert("Errore nella ricerca dell'indirizzo.");
+        console.error(error);
+      });
+  }
+</script>
+</body>
+</html>

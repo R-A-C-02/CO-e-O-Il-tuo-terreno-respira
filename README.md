@@ -11,3 +11,25 @@ ALCUNE REGOLE CONSIGLAITE DI SEGUIRE:
         PER IL BACK END è LORENZO IULIANO
     QUINDI PER OGNI PROBLEMA CON I VOSTRI DOCUMENTI E CURIOSITà CHIEDETE A LORO DIRETTAMENTE
 -   SCRIVETE SEMPRE UN COMMENTO ESAUSTIVO PRIMA DI PUSHARE IL COMMIT (altrimenti non sapiamo cos'hai fatto, piccolo conglioncello)
+
+
+
+
+
+Installazione
+Clonare il repository:
+
+git clone https://github.com/R-A-C-02/CO-e-O-Il-tuo-terreno-respira.git
+cd Stock-API
+Creare e attivare un ambiente virtuale:
+
+# Su Windows
+python -m venv .venv
+.venv\Scripts\activate
+
+# Su macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+Installare le dipendenze:
+
+pip install -r requirements.txt

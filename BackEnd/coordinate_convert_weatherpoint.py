@@ -1,13 +1,14 @@
 from geopy.distance import geodesic
 
 def trova_stazione_piu_vicina(terreno, punti_meteo):
-    """
+    '''
     Trova la stazione meteo più vicina al terreno.
     
     :param terreno: tuple (lat, lon) delle coordinate del terreno
     :param punti_meteo: lista di tuple (nome, lat, lon) delle stazioni meteo
     :return: nome della stazione più vicina e la distanza in km
-    """
+    '''
+
     stazione_piu_vicina = None
     distanza_minima = float('inf')
     
@@ -21,6 +22,13 @@ def trova_stazione_piu_vicina(terreno, punti_meteo):
             print(f"Errore calcolando la distanza per {nome}: {e}")
     
     return stazione_piu_vicina, distanza_minima
+
+
+
+
+
+
+
 
 # Esempio di utilizzo:
 
@@ -39,4 +47,4 @@ punti_meteo = [
 # Trova la stazione più vicina
 stazione, distanza = trova_stazione_piu_vicina(terreno, punti_meteo)
 
-print(f"La stazione meteo più vicina al terreno è: {stazione} a circa {distanza:.2f} km")
+print(f"\nLa stazione meteo più vicina al terreno è: {stazione} a circa {distanza:.2f} km")

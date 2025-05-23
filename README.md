@@ -20,7 +20,7 @@ Installazione
 Clonare il repository:
 
 git clone https://github.com/R-A-C-02/CO-e-O-Il-tuo-terreno-respira.git
-cd Stock-API
+cd CO-e-O-Il-tuo-terreno-respira
 Creare e attivare un ambiente virtuale:
 
 # Su Windows

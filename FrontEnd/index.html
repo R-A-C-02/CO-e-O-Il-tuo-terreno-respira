@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>CO₂ e O₂ - Il tuo terreno respira</title> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
+
+    <style>
+        :root {
+            --primary-green: #28a745;
+            --dark-green: #218838;
+            --primary-blue: #007bff;
+            --dark-blue: #0056b3;
+            --light-bg: #eef1f5;
+            --white-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #333;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+        }
+
+        /* Header for auth buttons and new title */
+        header {
+            background-color: var(--white-bg);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between; /* Space between title and buttons */
+            align-items: center;
+        }
+
+        .site-title {
+            margin: 0;
+            color: var(--primary-green);
+            font-size: 1.8em;
+            font-weight: 700;
+            white-space: nowrap; /* Prevent title from wrapping on one line if space is tight */
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-auth {
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-login {
+            background-color: var(--primary-green);
+            color: white;
+            border: 2px solid var(--primary-green);
+        }
+
+        .btn-login:hover {
+            background-color: white;
+            color: var(--primary-green);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-signup {
+            background-color: var(--primary-blue);
+            color: white;
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-signup:hover {
+            background-color: white;
+            color: var(--primary-blue);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        #container {
+            display: flex;
+            flex-direction: row;
+            /* Adjusted height for a header that's roughly 70px tall (padding + font size) */
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 350px;
+            background: var(--white-bg);
+            padding: 25px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #map {
+            flex: 1;
+            margin: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1;
+        }
+
+        label {
+            font-weight: 700;
+            margin-top: 5px;
+            display: block;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-top: 15px;
+            background-color: var(--primary-green);
+            color: white;
+            font-weight: 700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.05em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        h3 {
+            color: var(--primary-green);
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        h3:first-of-type {
+            margin-top: 0;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column; /* Stack title and buttons on small screens */
+                align-items: center;
+                gap: 10px; /* Space between title and buttons */
+                padding: 10px 15px;
+            }
+
+            .site-title {
+                font-size: 1.5em; /* Smaller title on mobile */
+                text-align: center;
+            }
+
+            .auth-buttons {
+                width: 100%; /* Make buttons take full width */
+                justify-content: center; /* Center buttons */
+            }
+
+            #container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            #sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            }
+
+            #map {
+                flex: none;
+                height: 60vh;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 class="site-title">CO₂ e O₂: Il tuo terreno respira</h1>
+    <div class="auth-buttons">
+        <a href="login.html" class="btn-auth btn-login">Accedi</a>
+        <a href="signup.html" class="btn-auth btn-signup">Registrati</a>
+    </div>
+</header>
+
+<div id="container">
+    <div id="sidebar">
+        <h3>Cerca Indirizzo</h3>
+        <label for="indirizzo">Via, città, CAP o regione:</label>
+        <input type="text" id="indirizzo" placeholder="es. Via Roma, 00100 Roma">
+        <button onclick="goToLocation()">Vai alla posizione</button>
+
+        <h3>Specie Vegetali</h3>
+        <label for="specie">Specie vegetale:</label>
+        <input type="text" id="specie" placeholder="es. quercia">
+
+        <label for="quantita">Quantità o area:</label>
+        <input type="text" id="quantita" placeholder="es. 50 alberi o 300 m²">
+
+        <button onclick="saveData()">Salva terreno</button>
+    </div>
+
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script>
+    // Initialize the map
+    const map = L.map('map').setView([42.5, 12.5], 6);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors, Tiles courtesy of OSM France',
+        subdomains: 'abc',
+        maxZoom: 20
+    }).addTo(map);
+
+    // FeatureGroup for drawn items (polygons)
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    // Leaflet Draw Control
+    const drawControl = new L.Control.Draw({
+        draw: {
+            polygon: {
+                allowIntersection: false,
+                showArea: true, // This is already true, shows area during drawing
+                shapeOptions: {
+                    color: "#2e7d32",
+                    weight: 3,
+                    opacity: 1,
+                    fillColor: "#81c784",
+                    fillOpacity: 0.5
+                }
+            },
+            polyline: false,
+            rectangle: false,
+            circle: false,
+            marker: false,
+            circlemarker: false
+        },
+        edit: { featureGroup: drawnItems }
+    });
+    map.addControl(drawControl);
+
+    // Style for the drawn polygons
+    const polygonStyle = {
+        color: "#2e7d32",
+        weight: 3,
+        opacity: 1,
+        fillColor: "#81c784",
+        fillOpacity: 0.5
+    };
+
+    let savedTerrains = []; // Array to store saved terrain data
+    let currentPolygon = null; // Holds the currently drawn polygon
+    let addressMarker = null; // Holds the marker for searched addresses
+
+    // Function to format numbers for display
+    function formatNumber(num) {
+        return num.toFixed(2).replace(/\.00$/, ''); // Remove .00 if integer
+    }
+
+    // Event listener for when a new shape is created (drawn)
+    map.on(L.Draw.Event.CREATED, function (e) {
+        currentPolygon = e.layer;
+        currentPolygon.setStyle(polygonStyle);
+        drawnItems.addLayer(currentPolygon);
+
+        // Calculate perimeter and area immediately after drawing
+        const geojson = currentPolygon.toGeoJSON();
+        const area = turf.area(geojson); // Area in square meters
+        const perimeter = turf.length(geojson, { units: 'meters' }); // Perimeter in meters
+
+        // Update the popup with calculated values
+        currentPolygon.bindPopup(
+            `<strong>Area:</strong> ${formatNumber(area)} m²<br>` +
+            `<strong>Perimetro:</strong> ${formatNumber(perimeter)} m<br>` +
+            `Disegna il poligono. Ora inserisci le informazioni sulle specie e clicca 'Salva terreno'.`
+        ).openPopup();
+
+        alert("Poligono disegnato. Ora inserisci le informazioni sulle specie e clicca 'Salva terreno'.");
+    });
+
+    /**
+     * Saves the data associated with the drawn polygon.
+     */
+    function saveData() {
+        const species = document.getElementById("specie").value.trim();
+        const quantity = document.getElementById("quantita").value.trim();
+
+        if (!species || !quantity) {
+            alert("Per favore, compila sia 'Specie vegetale' che 'Quantità o area'.");
+            return;
+        }
+
+        if (!currentPolygon) {
+            alert("Per favore, disegna un poligono sulla mappa prima di salvare.");
+            return;
+        }
+
+        // Get polygon coordinates (not strictly needed for Turf calculations here)
+        // const coords = currentPolygon.getLatLngs();
+
+        // Calculate perimeter and area again for persistent storage/popup
+        const geojson = currentPolygon.toGeoJSON();
+        const area = turf.area(geojson); // Area in square meters
+        const perimeter = turf.length(geojson, { units: 'meters' }); // Perimeter in meters
+
+        // Bind a popup to the polygon with the entered data and measurements
+        currentPolygon.bindPopup(
+            `<strong>Specie:</strong> ${species}<br>` +
+            `<strong>Quantità:</strong> ${quantity}<br>` +
+            `<strong>Area:</strong> ${formatNumber(area)} m²<br>` +
+            `<strong>Perimetro:</strong> ${formatNumber(perimeter)} m`
+        ).openPopup(); // Open popup immediately after saving
+
+        // Store the data, including calculated values
+        savedTerrains.push({
+            species,
+            quantity,
+            area: area,
+            perimeter: perimeter,
+            coordinates: currentPolygon.getLatLngs() // Store Leaflet LatLngs
+        });
+
+        console.log("Terreni salvati:", savedTerrains);
+
+        // Clear the input fields and reset currentPolygon
+        document.getElementById("specie").value = "";
+        document.getElementById("quantita").value = "";
+        currentPolygon = null; // Clear the current polygon reference
+        alert("Terreno salvato con successo!");
+    }
+
+    /**
+     * Zooms the map to a specified address and places a marker.
+     */
+    function goToLocation() {
+        const address = document.getElementById("indirizzo").value.trim();
+        if (!address) {
+            alert("Per favore, inserisci un indirizzo valido.");
+            return;
+        }
+
+        // Use Nominatim OpenStreetMap API for geocoding
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    alert("Indirizzo non trovato. Prova con una ricerca più specifica.");
+                    return;
+                }
+                const lat = data[0].lat;
+                const lon = data[0].lon;
+
+                map.setView([lat, lon], 16); // Zoom to the found location
+
+                // Remove previous marker if it exists
+                if (addressMarker) {
+                    map.removeLayer(addressMarker);
+                }
+
+                // Add a new marker
+                addressMarker = L.marker([lat, lon]).addTo(map)
+                    .bindPopup("Indirizzo trovato: " + address)
+                    .openPopup();
+            })
+            .catch(error => {
+                alert("Si è verificato un errore durante la ricerca dell'indirizzo. Riprova più tardi.");
+                console.error("Error fetching address:", error);
+            });
+    }
+</script>
+
+</body>
+</html>

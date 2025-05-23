@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrati - CO₂ e O₂</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+      background: linear-gradient(135deg, #e0f2f7 0%, #c8e6c9 100%); /* Soft gradient background */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .form-container {
+      background: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+      padding: 40px; /* Increased padding */
+      border-radius: 15px; /* More rounded corners */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Stronger, softer shadow */
+      width: 320px; /* Slightly wider */
+      text-align: center;
+      transition: transform 0.3s ease-in-out; /* Smooth transition on hover */
+    }
+    .form-container:hover {
+      transform: translateY(-5px); /* Subtle lift effect on hover */
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 25px; /* More space below heading */
+      font-size: 2em; /* Larger heading */
+      font-weight: 600; /* Slightly bolder */
+    }
+    input {
+      width: calc(100% - 20px); /* Account for padding */
+      padding: 12px 10px; /* Increased vertical padding */
+      margin-top: 15px; /* More space between inputs */
+      border: 1px solid #ddd;
+      border-radius: 8px; /* Rounded input fields */
+      box-sizing: border-box; /* Include padding in width */
+      font-size: 1em;
+      transition: border-color 0.3s ease; /* Smooth transition on focus */
+    }
+    input:focus {
+      border-color: #4CAF50; /* Highlight border on focus */
+      outline: none; /* Remove default outline */
+    }
+    button {
+      width: 100%;
+      padding: 15px; /* Larger button */
+      margin-top: 30px; /* More space above button */
+      background-color: #4CAF50; /* A more pleasant green (changed from blue) */
+      color: white;
+      border: none;
+      border-radius: 8px; /* Rounded button */
+      font-weight: bold;
+      font-size: 1.1em; /* Larger font on button */
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); /* Subtle shadow for button */
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049; /* Darker green on hover */
+      transform: translateY(-2px); /* Subtle lift on hover */
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+    }
+    a {
+      display: block;
+      margin-top: 25px; /* More space above link */
+      text-align: center;
+      text-decoration: none;
+      color: #007bff; /* Kept original blue for link */
+      font-size: 0.95em;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Registrati</h2>
+    <form action="/signup" method="POST">
+      <input type="text" name="nome" placeholder="Nome completo" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <input type="password" name="confirm_password" placeholder="Conferma Password" required>
+      <button type="submit">Crea account</button>
+    </form>
+    <a href="login.html">Hai già un account? Accedi</a>
+  </div>
+</body>
+</html>

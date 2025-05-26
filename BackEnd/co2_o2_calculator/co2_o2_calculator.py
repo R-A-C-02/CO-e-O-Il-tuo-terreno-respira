@@ -15,8 +15,12 @@ def calculate_co2_o2_hourly(plants, hourly_weather, coefficients):              
             print(f"⚠️  Attenzione: non sono presenti dati per la specie '{species}' nei coefficienti.")
             continue
 
-        factor = coefficients[species]                                          # PER OGNI SPECIE DALLA LISTA DEI COEFFICIENTI CREO UN DIZIONARIO
-        total_co2 = 0                                                           # INIZIALIZZO IL CO2 A 0
+        co2_factor = coefficients[species]["co2"]
+        o2_factor = coefficients[species]["o2"]
+                                       # PER OGNI SPECIE nella LISTA DEI COEFFICIENTI CREO UN DIZIONARIO
+        total_co2 = 0
+        total_o2 = 0
+                                                          # INIZIALIZZO IL CO2 A 0
 
         for hour in hourly_weather:                                         
             radiation = hour.get("radiation", 0)                                # ITERO SU LA LISTA DI DATI METEO
@@ -24,20 +28,23 @@ def calculate_co2_o2_hourly(plants, hourly_weather, coefficients):              
             humidity = hour.get("humidity", 60)
 
             rad_factor = min(radiation / 800, 1.0)                              # CALCOLO GLI INDICATORI UTILI AL FACTOR DEL METEO
-            temp_factor = min(temperature / 25, 1.0)
+            temp_factor = min(temperature / 25, 1.0)                        # DACONTROLLARE
             hum_factor = min(humidity / 60, 1.0)
 
             meteo_factor = rad_factor * temp_factor * hum_factor                # DEFINISCO IL FACTOR DEL METEO
             base = area if area else quantity                                   
-            co2_hour = base * factor * meteo_factor                               
-            total_co2 += co2_hour                                               
+            co2_hour = base * co2_factor * meteo_factor
+            total_co2 += co2_hour
 
-        o2 = total_co2 * 0.73                                               # CALCOLO L'O2
+            o2_hour = base * o2_factor * meteo_factor
+            total_o2 += o2_hour                                             
+
         results.append({
             "species": species,
             "co2_kg_day": round(total_co2, 3),
-            "o2_kg_day": round(o2, 3)
+            "o2_kg_day": round(total_o2, 3)
         })
+
     return results                                                          # RITORNO LA LISTA DI DIZIONARI
 
 # Carica i dati                           PARTE DA MODIFICARE QUANDO TUTTE LE ROUTE E LE API SONO FUNZIONANTI
@@ -45,7 +52,14 @@ with open("plants.json", "r", encoding="utf-8") as f:
     plants = json.load(f)
 
 with open("coefficients.json", "r", encoding="utf-8") as f:
-    coefficients = json.load(f)
+    raw_coefficients = json.load(f)
+    coefficients = {
+        item["name"]: {
+            "co2": item["co2_absorption_rate"],
+            "o2": item["o2_production_rate"]
+        }
+        for item in raw_coefficients
+    }
 
 with open("weather.json", "r", encoding="utf-8") as f:
     weather_data = json.load(f)

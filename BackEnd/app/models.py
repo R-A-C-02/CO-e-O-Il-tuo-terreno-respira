@@ -60,9 +60,8 @@ class WeatherData(Base):
 
 
 class CalcoloRequest(BaseModel):
-    terreno: List[Coordinate]
-
-    vegetazione: List[SpecieVegetale]
+    terreno: List[Plot]
+    vegetazione: List[PlotSpecies]
 
 class CalcoloResponse(BaseModel):
     co2_giornaliera: float
@@ -71,8 +70,8 @@ class CalcoloResponse(BaseModel):
 
 class InserisciRequest(BaseModel):
     utente : str
-    terreno: List[Coordinate]
-    vegetazione: SpecieVegetale
+    terreno: List[Plot]
+    vegetazione: List[PlotSpecies]
    
 
 class InserisciResponse(BaseModel):

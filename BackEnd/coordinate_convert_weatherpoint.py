@@ -22,8 +22,6 @@ def trova_stazione_piu_vicina(terreno, punti_meteo):
             print(f"Errore calcolando la distanza per {nome}: {e}")
     
     return stazione_piu_vicina, distanza_minima
-ytdurtyujrtyu
-sedrdhgsedrgase
 
 
 

@@ -28,8 +28,6 @@ def trova_stazione_piu_vicina(terreno, punti_meteo):
 
 
 
-
-
 # Esempio di utilizzo:
 
 # Coordinate del terreno (sostituisci con le tue coordinate)

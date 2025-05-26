@@ -73,7 +73,7 @@ class CalcoloResponse(BaseModel):
 
 class InserisciRequest(BaseModel):
     utente : User
-    terreno: List[Plot]
+    terreno: Plot
     vegetazione: List[PlotSpecies]
    
 

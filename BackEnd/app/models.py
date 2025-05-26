@@ -72,7 +72,7 @@ class CalcoloResponse(BaseModel):
     dettaglio_per_specie: List[dict]  # Esempio: {"nome": "quercia", "co2": 12.4, "o2": 8.1} (vogliamo farlo così?)
 
 class InserisciRequest(BaseModel):
-    utente : str
+    utente : User
     terreno: List[Plot]
     vegetazione: List[PlotSpecies]
    

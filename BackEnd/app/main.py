@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 from app.database import engine
-from app.models import Base
+from app.models import Base,User, UserLogin
+from app.routes import router
+from app.security import hash_password, verify_password
 from app.models import CalcoloRequest, CalcoloResponse, InserisciRequest, InserisciResponse, ClassificaRequest, ClassificaResponse, EsportaRequest, EsportaResponse
 from app.utils import calcola_impatti,inserisci_terreno,mostra_classifica,Esporta
 
 app = FastAPI()
+app.include_router(router)
 
 @app.on_event("startup")
 async def startup():

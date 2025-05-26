@@ -18,7 +18,9 @@ class UserOut(UserBase):
     class Config:
         orm_mode = True
 
-
+class UserLogin(UserBase):
+    ...
+    
 # ========== PLOT ==========
 
 class PlotBase(BaseModel):

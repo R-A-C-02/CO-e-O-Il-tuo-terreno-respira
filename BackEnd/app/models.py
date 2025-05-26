@@ -17,6 +17,9 @@ class User(Base):
 
     plots = relationship("Plot", backref="owner")
 
+class UserLogin(Base):
+    username: str
+    password: str
 
 class Plot(Base):
     __tablename__ = "plots"

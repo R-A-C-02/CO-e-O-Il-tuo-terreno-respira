@@ -1,0 +1,5 @@
+[
+  { "species": "quercia", "quantity": 5 },
+  { "species": "pino", "quantity": 10 },
+  { "species": "mais", "area_m2": 300 }
+]

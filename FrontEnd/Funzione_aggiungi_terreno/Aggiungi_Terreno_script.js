@@ -802,10 +802,13 @@ function updateDashboard() {
     // Se un terreno è selezionato, usa la sua area; altrimenti, l'area è 0.
     const areaForDisplay = selectedTerreno ? parseFloat(selectedTerreno.area_ha || 0).toFixed(2) : '0.00';
 
+    // Se un terreno è selezionato, usa la sua CO2 assorbita; altrimenti, la CO2 è 0.
+    const co2ForDisplay = selectedTerreno ? parseFloat(selectedTerreno.co2_kg_annuo || 0).toFixed(2) : '0.00';
+
     // Aggiorna la casella "Area Totale (ha)" con l'area del terreno selezionato
     document.getElementById("total-area").textContent = areaForDisplay;
 
-    document.getElementById("total-co2").textContent = totalCO2; // Lascia questa riga per CO2 totale
+    document.getElementById("total-co2").textContent = co2ForDisplay; // Lascia questa riga per CO2 totale
 
     updateTerreniTable();
     updateCO2Chart();
@@ -823,17 +826,8 @@ function updateTerreniTable() {
         row.insertCell().textContent = t.area_ha || '0.00';
         row.insertCell().textContent = t.co2_kg_annuo || '0.00';
         const actionsCell = row.insertCell(); // <-- Creazione corretta della cella per i pulsanti
-
-        const selectButton = document.createElement('button');
-        selectButton.innerHTML = '<i class="fas fa-map-marker-alt"></i>';
-        selectButton.title = 'Seleziona Terreno';
-        selectButton.style.color = 'var(--primary-blue)';
-        selectButton.onclick = (e) => {
-            e.stopPropagation();
-            selectTerreno(t.id);
-        };
-        actionsCell.appendChild(selectButton);
-
+        actionsCell.classList.add('actions-cell'); ////
+        
         const editButton = document.createElement('button');
         editButton.innerHTML = '<i class="fas fa-edit"></i>';
         editButton.title = 'Modifica Nome';

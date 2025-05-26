@@ -25,7 +25,7 @@ body, html {
 }
 
 header {
-    background-color: var(--white-bg);
+    background-color: var(--dark-green);
     padding: 15px 30px;
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -42,7 +42,7 @@ header {
 
 .site-title {
     margin: 0;
-    color: var(--primary-green);
+    color: white;
     font-size: 1.8em;
     font-weight: 700;
 }
@@ -55,10 +55,12 @@ header {
     padding: 5px 10px;
     border-radius: 25px;
     transition: background-color 0.3s ease;
+    background-color: var(--primary-green); /* Aggiunto/Modificato questo */
+
 }
 
 .user-profile:hover {
-    background-color: var(--light-bg);
+    background-color: #3cb371;
 }
 
 .user-profile img {
@@ -66,12 +68,12 @@ header {
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--primary-green);
+    border: 2px solid white;
 }
 
 .user-profile span {
     font-weight: 700;
-    color: var(--text-color);
+    color: white;
     font-size: 1.1em;
 }
 
@@ -403,6 +405,31 @@ h4 {
 .terreno-actions button:hover {
     color: var(--dark-blue);
 }
+
+
+#terreni-table .actions-cell { /* Questa classe va aggiunta alla cella nel JS */
+    display: flex;
+    gap: 5px; 
+    justify-content: center; /* Per centrare i bottoni orizzontalmente nella cella */
+    align-items: center; /* Per allineare i bottoni verticalmente nella cella */
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+#terreni-table .actions-cell button {
+    width: auto; 
+    padding: 5px 8px; 
+    font-size: 0.9em; /* grandezza */
+}
+
+#terreni-table thead th {
+    /* Stili generali per le intestazioni della tabella */
+    padding: 10px; /* Padding su tutti i lati */
+    padding-bottom: 25px; 
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
 
 /* Styles for multiple species input (in details section) */
 .species-list {

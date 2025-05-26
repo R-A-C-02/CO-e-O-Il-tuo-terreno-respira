@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from app.database import engine
 from app.models import Base
+from app.routes import weather
+
 
 app = FastAPI()
+app.include_router(weather.router)
 
 @app.on_event("startup")
 async def startup():

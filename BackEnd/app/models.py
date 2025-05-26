@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, TIMESTAMP
 from sqlalchemy.orm import relationship, declarative_base
 from geoalchemy2 import Geometry
+from pydantic import BaseModel, Field
+from typing import List
 
 Base = declarative_base()
 
@@ -57,5 +59,28 @@ class WeatherData(Base):
     solar_radiation = Column(Float)
 
 
+class CalcoloRequest(BaseModel):
+    terreno: List[Plot]
+    vegetazione: List[PlotSpecies]
+
+class CalcoloResponse(BaseModel):
+    co2_giornaliera: float
+    o2_giornaliera: float
+    dettaglio_per_specie: List[dict]  # Esempio: {"nome": "quercia", "co2": 12.4, "o2": 8.1} (vogliamo farlo così?)
+
+class InserisciRequest(BaseModel):
+    utente : str
+    terreno: List[Plot]
+    vegetazione: List[PlotSpecies]
+   
+
+class InserisciResponse(BaseModel):
+    esito : str
+
+class ClassificaRequest(BaseModel):
+    criterio: str
+
+class ClassificaResponse(BaseModel):
+    Classifica: List[dict]
 
 #pip install fastapi uvicorn sqlalchemy geoalchemy2 shapely psycopg2-binary

@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, TIMESTAMP, func
 from sqlalchemy.orm import relationship, declarative_base
 from geoalchemy2 import Geometry
+from pydantic import BaseModel, Field
+from typing import List
 
 Base = declarative_base()
 

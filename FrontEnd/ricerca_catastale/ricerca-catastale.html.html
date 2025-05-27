@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Ricerca Catastale - Il tuo terreno respira</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="ricerca-catastale-style.css">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <button class="hamburger-button" onclick="toggleSearchPanel()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <h1 class="site-title">Ricerca Catastale - Il tuo terreno respira</h1>
+    </div>
+    <div class="user-profile" onclick="location.href='profile.html'">
+        <img src="https://via.placeholder.com/40/28a745/ffffff?text=BB" alt="Bianca Bianchi Profile Picture">
+        <span>Bianca Bianchi</span>
+    </div>
+</header>
+
+<div id="container">
+    <!-- Pannello di ricerca a sinistra -->
+    <div id="search-panel">
+        <div class="search-header">
+            <h3><i class="fas fa-search"></i> Ricerca Mappa</h3>
+            <button class="reset-search-btn" onclick="resetSearch()">
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </div>
+
+        <!-- Breadcrumb per navigazione -->
+        <div class="breadcrumb-container">
+            <div id="breadcrumb">
+                <span class="breadcrumb-item active">Italia</span>
+            </div>
+        </div>
+
+        <!-- Sezione Regioni -->
+        <div id="regioni-section" class="search-section">
+            <h4><i class="fas fa-map"></i> Seleziona Regione</h4>
+            <div class="search-input-group">
+                <input type="text" id="regioni-search" placeholder="Cerca regione...">
+                <button onclick="clearRegionSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="regioni-list" class="selection-list">
+                <!-- Le regioni verranno caricate dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Sezione Province -->
+        <div id="province-section" class="search-section" style="display: none;">
+            <h4><i class="fas fa-city"></i> Seleziona Provincia</h4>
+            <div class="search-input-group">
+                <input type="text" id="province-search" placeholder="Cerca provincia...">
+                <button onclick="clearProvinceSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="province-list" class="selection-list">
+                <!-- Le province verranno caricate dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Sezione Comuni -->
+        <div id="comuni-section" class="search-section" style="display: none;">
+            <h4><i class="fas fa-building"></i> Seleziona Comune</h4>
+            <div class="search-input-group">
+                <input type="text" id="comuni-search" placeholder="Cerca comune...">
+                <button onclick="clearComuniSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="comuni-list" class="selection-list">
+                <!-- I comuni verranno caricati dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Sezione Fogli -->
+        <div id="fogli-section" class="search-section" style="display: none;">
+            <h4><i class="fas fa-file-alt"></i> Seleziona Foglio</h4>
+            <div class="search-input-group">
+                <input type="text" id="fogli-search" placeholder="Cerca foglio...">
+                <button onclick="clearFogliSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="fogli-list" class="selection-list">
+                <!-- I fogli verranno caricati dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Sezione Particelle -->
+        <div id="particelle-section" class="search-section" style="display: none;">
+            <h4><i class="fas fa-puzzle-piece"></i> Seleziona Particelle</h4>
+            <div class="search-input-group">
+                <input type="text" id="particelle-search" placeholder="Cerca particella...">
+                <button onclick="clearParticelleSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="particelle-list" class="selection-list">
+                <!-- Le particelle verranno caricate dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Sezione Particelle Selezionate -->
+        <div id="selected-parcels-section" class="search-section">
+            <h4><i class="fas fa-check-circle"></i> Particelle Selezionate</h4>
+            <div id="selected-parcels-container">
+                <p class="no-selection">Nessuna particella selezionata</p>
+            </div>
+            <div class="selected-parcels-actions">
+                <button id="save-selection-btn" class="primary-btn" disabled onclick="saveSelectedParcels()">
+                    <i class="fas fa-save"></i> Salva Selezione
+                </button>
+                <button id="clear-selection-btn" class="danger-btn" disabled onclick="clearSelectedParcels()">
+                    <i class="fas fa-trash"></i> Cancella Tutto
+                </button>
+                <button id="export-selection-btn" class="secondary-btn" disabled onclick="exportSelectedParcels()">
+                    <i class="fas fa-download"></i> Esporta
+                </button>
+            </div>
+        </div>
+
+        <!-- Informazioni sulla selezione corrente -->
+        <div id="current-selection-info" class="info-section">
+            <h4><i class="fas fa-info-circle"></i> Informazioni</h4>
+            <div id="selection-details">
+                <p><strong>Livello:</strong> <span id="current-level">Italia</span></p>
+                <p><strong>Selezione:</strong> <span id="current-selection">Nessuna</span></p>
+                <p><strong>Totale particelle:</strong> <span id="total-parcels">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Area principale con la mappa -->
+    <div id="main-map-area">
+        <div id="map-container">
+            <!-- La mappa Leaflet verrà inizializzata qui -->
+        </div>
+        
+        <!-- Controlli mappa -->
+        <div id="map-controls">
+            <div class="map-control-group">
+                <button id="zoom-italy-btn" class="map-control-btn" title="Zoom su Italia">
+                    <i class="fas fa-globe-europe"></i>
+                </button>
+                <button id="toggle-satellite-btn" class="map-control-btn" title="Vista satellitare">
+                    <i class="fas fa-satellite"></i>
+                </button>
+                <button id="toggle-cadastral-btn" class="map-control-btn active" title="Layer catastale">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+            </div>
+            
+            <div class="map-info">
+                <div id="coordinates-display">
+                    <span id="mouse-coords">Lat: -, Lng: -</span>
+                </div>
+                <div id="zoom-level">
+                    Zoom: <span id="current-zoom">6</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per dettagli particella -->
+<div id="parcel-detail-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4><i class="fas fa-info-circle"></i> Dettagli Particella</h4>
+            <button class="close-modal" onclick="closeParcelDetailModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="parcel-detail-content">
+                <!-- Contenuto dettagli particella -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="add-parcel-modal-btn" class="primary-btn" onclick="addParcelFromModal()">
+                <i class="fas fa-plus"></i> Aggiungi Particella
+            </button>
+            <button class="secondary-btn" onclick="closeParcelDetailModal()">
+                Chiudi
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="ricerca-catastale-script.js"></script>
+
+</body>
+</html>

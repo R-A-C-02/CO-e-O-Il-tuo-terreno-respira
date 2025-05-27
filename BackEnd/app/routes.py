@@ -1,14 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.auth import create_access_token
+from app.auth import create_access_token, decode_access_token
 from app.schemas import UserCreate, UserLogin
 from app.models import User
 from app.security import hash_password, verify_password
 from app.database import SessionLocal
-from fastapi import Header
-from app.auth import decode_access_token
-
 
 router = APIRouter()
 
@@ -18,13 +15,14 @@ async def get_db():
 
 @router.post("/register")
 async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.username == user.username))
+    # Controlla se l'email è già registrata
+    result = await db.execute(select(User).where(User.email == user.email))
     existing_user = result.scalar_one_or_none()
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username già registrato")
+        raise HTTPException(status_code=400, detail="Email già registrata")
     new_user = User(
-        username=user.username,
-        hashed_password=hash_password(user.password)
+        email=user.email,
+        password=hash_password(user.password)
     )
     db.add(new_user)
     await db.commit()
@@ -32,14 +30,12 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login")
 async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.username == user.username))
+    result = await db.execute(select(User).where(User.email == user.email))
     db_user = result.scalar_one_or_none()
-    if not db_user or not verify_password(user.password, db_user.hashed_password):
+    if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=401, detail="Credenziali non valide")
-    token = create_access_token({"sub": user.username})
+    token = create_access_token({"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
-
-
 
 @router.get("/utente-protetto")
 async def protected_route(authorization: str = Header(...)):

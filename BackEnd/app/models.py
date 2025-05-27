@@ -127,10 +127,16 @@ class InserisciRequest(BaseModel):
     utente : User
     terreno: Plot
     vegetazione: List[PlotSpecies]
-   
 
 class InserisciResponse(BaseModel):
     esito : str
+
+class MeteoRequest(BaseModel):
+    IDterreno: int
+
+class MeteoResponse(BaseModel):
+    IDterreno: int    
+    
 
 class ClassificaRequest(BaseModel):
     criterio: str

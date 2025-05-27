@@ -31,6 +31,10 @@ async def inserisci_terreno(payload: InserisciRequest):
 async def mostra_classifica(payload: ClassificaRequest):
     return await mostra_classifica(payload)
 
+@app.get("/getmeteo", response_model=MeteoRequest)
+async def get_meteo(payload: MeteoRequest):
+    return await get_meteo(payload)
+
 @app.get("/esporta", response_model=EsportaResponse)
 async def Esporta(payload: EsportaRequest):
     return await Esporta(payload)

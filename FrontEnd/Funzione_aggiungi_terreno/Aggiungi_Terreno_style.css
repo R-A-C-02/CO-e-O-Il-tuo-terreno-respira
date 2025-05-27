@@ -425,6 +425,31 @@ h4 {
     color: var(--dark-blue);
 }
 
+
+#terreni-table .actions-cell { /* Questa classe va aggiunta alla cella nel JS */
+    display: flex;
+    gap: 5px; 
+    justify-content: center; /* Per centrare i bottoni orizzontalmente nella cella */
+    align-items: center; /* Per allineare i bottoni verticalmente nella cella */
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+#terreni-table .actions-cell button {
+    width: auto; 
+    padding: 5px 8px; 
+    font-size: 0.9em; /* grandezza */
+}
+
+#terreni-table thead th {
+    /* Stili generali per le intestazioni della tabella */
+    padding: 10px; /* Padding su tutti i lati */
+    padding-bottom: 25px; 
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+
 /* Styles for multiple species input (in details section) */
 .species-list {
     list-style: none;

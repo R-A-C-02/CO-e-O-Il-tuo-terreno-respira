@@ -979,6 +979,7 @@ function updateTerreniTable() {
 
     terreni.forEach(t => {
         const row = tableBody.insertRow();
+<<<<<<< HEAD
         // Aggiungi l'attributo data-label a ogni cella per la responsività
         const cell1 = row.insertCell();
         cell1.textContent = t.name;
@@ -991,6 +992,23 @@ function updateTerreniTable() {
         const cell3 = row.insertCell();
         cell3.textContent = t.area_ha || '0.00';
         cell3.setAttribute('data-label', 'Area (ha)');
+=======
+        row.insertCell().textContent = t.name;
+        row.insertCell().textContent = t.species.map(s => `${s.name} (${s.quantity})`).join(', ') || 'N/A';
+        row.insertCell().textContent = t.area_ha || '0.00';
+        row.insertCell().textContent = t.co2_kg_annuo || '0.00';
+        const actionsCell = row.insertCell(); // <-- Creazione corretta della cella per i pulsanti
+        actionsCell.classList.add('actions-cell'); ////
+        
+        const editButton = document.createElement('button');
+        editButton.innerHTML = '<i class="fas fa-edit"></i>';
+        editButton.title = 'Modifica Nome';
+        editButton.onclick = (e) => {
+            e.stopPropagation();
+            editTerrenoName(t.id);
+        };
+        actionsCell.appendChild(editButton);
+>>>>>>> 16b11b4eac7095159b938f7a08a44e3f984419c9
 
         const cell4 = row.insertCell();
         cell4.textContent = t.co2_kg_annuo || '0.00';

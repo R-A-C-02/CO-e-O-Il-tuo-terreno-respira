@@ -2,7 +2,6 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>CO₂ e O₂ - Il tuo terreno respira</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -12,7 +11,7 @@
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="stylesheet" href="Aggiungi_Terreno_style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -26,24 +25,14 @@
         <h1 class="site-title">CO₂ e O₂: Il tuo terreno respira</h1>
     </div>
     <div class="user-profile" onclick="location.href='profile.html'">
-        <span>Er Villa De Ostia</span>
+        <img src="https://via.placeholder.com/40/28a745/ffffff?text=BB" alt="Bianca Bianchi Profile Picture">
+        <span>Bianca Bianchi</span>
     </div>
 </header>
 
 <div id="container">
     <div id="sidebar">
         <h3>I miei terreni</h3>
-
-        <div class="address-search-sidebar">
-            <input type="text" id="indirizzo_search_sidebar" placeholder="Cerca Indirizzo:">
-            <button onclick="goToLocationSidebar()" class="search-address-button" title="Cerca Indirizzo">
-                <i class="fas fa-search"></i>
-            </button>
-            <button onclick="clearAddressMarkerAndInput()" class="clear-pin-button" title="Cancella Pin e Indirizzo">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
         <div class="terreno-input-group">
             <input type="text" id="terreno-name-input" placeholder="Nome Terreno" value="Nuovo Terreno">
             <button class="add-terreno-button" onclick="addTerreno()">
@@ -54,33 +43,26 @@
         </ul>
     </div>
 
-    <div id="main-content-area">
+            <div class="form-group">
+                <label>Genere</label>
+                <div class="radio-group">
+                    <input type="radio" id="genere-maschio" name="genere" value="maschio">
+                    <label for="genere-maschio">Maschio</label>
 
-        <div id="main-map-container"></div>
+                    <input type="radio" id="genere-femmina" name="genere" value="femmina">
+                    <label for="genere-femmina">Femmina</label>
 
-        <div id="selected-terrain-details" class="dashboard-section" style="display: none;">
-            <h3>Dettagli Terreno: <span id="current-terrain-name"></span></h3>
+                    <input type="radio" id="genere-altro" name="genere" value="altro">
+                    <label for="genere-altro">Altro</label>
 
-            <div class="info-group">
-                <div>
-                    <label for="area">Area (ha):</label>
-                    <input type="text" id="area" placeholder="Disegna sulla mappa" readonly>
-                </div>
-                <div>
-                    <label for="perimetro">Perimetro (m):</label>
-                    <input type="text" id="perimetro" placeholder="Disegna sulla mappa" readonly>
-                </div>
-                <div>
-                    <label for="quantita">Quantità (generica, non usata per CO₂ se specie specifiche con quantità):</label>
-                    <input type="text" id="quantita" placeholder="es. 50 alberi">
+                    <input type="radio" id="genere-non-specificato" name="genere" value="non-specificato" checked>
+                    <label for="genere-non-specificato">Preferisco non specificare</label>
                 </div>
             </div>
 
-            <h4 style="margin-top: 5px;">Specie Vegetali</h4>
-            <div class="species-input-group">
-                <input type="text" id="new-species-name-input" placeholder="Nome (es. quercia)" style="flex: 1;">
-                <input type="text" id="new-species-quantity-input" placeholder="Quantità o Densità (es. 10 alberi, 50 m²)" style="flex: 1;">
-                <button onclick="addSpeciesToSelectedTerrain()">Aggiungi Specie</button>
+            <div class="form-group">
+                <label for="provincia">Provincia</label>
+                <input type="text" id="provincia" name="provincia" placeholder="Es: Milano">
             </div>
             <ul id="species-list-for-selected-terrain" class="species-list">
             </ul>
@@ -91,6 +73,14 @@
         </div>
 
         <div class="info-panel-row">
+            <div id="address-section" class="dashboard-section">
+                <h3>Indirizzo</h3>
+                <p id="address-display">Nessun indirizzo trovato.</p>
+                <label for="indirizzo_search">Cerca Indirizzo:</label>
+                <input type="text" id="indirizzo_search" placeholder="es. Via Roma, 00100 Roma">
+                <button onclick="goToLocation()">Cerca</button>
+            </div>
+
             <div id="coordinates-section" class="dashboard-section">
                 <h3>Coordinate Centroide Poligono</h3>
                 <p id="centroid-display">Centroide: N/A</p>
@@ -98,24 +88,14 @@
             </div>
         </div>
 
-        <div id="polygon-vertices-section" class="dashboard-section" style="display: none;">
-            <h3>Coordinate Vertici Poligono</h3>
-            <div id="vertices-display" class="vertices-list">
-                Nessun poligono selezionato o disegnato.
-            </div>
-        </div>
-
         <div class="dashboard-section">
-            <h3>Riepilogo Terreno</h3>
+            <h3>Riepilogo Globale Terreni</h3>
             <div class="summary-grid">
                 <div class="summary-item">
                     <h4>CO₂ Assorbita Totale (kg/anno)</h4>
                     <p id="total-co2">0</p>
                 </div>
-                <div class="summary-item">
-                    <h4>Area Totale (ha)</h4>
-                    <p id="total-area">0</p>
-                </div>
+                <small>Il numero di telefono potrebbe essere utilizzato per verifiche di sicurezza.</small>
             </div>
             <div class="chart-container">
                 <canvas id="co2Chart"></canvas>
@@ -123,7 +103,7 @@
         </div>
 
         <div class="dashboard-section">
-            <h3>Dettagli</h3>
+            <h3>Tutti i Terreni in Dettaglio</h3>
             <table id="terreni-table" style="width:100%; border-collapse: collapse; margin-top: 15px;">
                 <thead>
                 <tr style="background-color: var(--light-bg);">
@@ -131,7 +111,8 @@
                     <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Specie</th>
                     <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Area (ha)</th>
                     <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">CO₂ Assorbita (kg/anno)</th>
-                    </tr>
+                    <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Azioni</th>
+                </tr>
                 </thead>
                 <tbody>
                 </tbody>
@@ -143,7 +124,7 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.10.0/leaflet.geometryutil.min.js"></script>
-<script src="Aggiungi_Terreno_script.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

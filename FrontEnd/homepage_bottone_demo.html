@@ -114,9 +114,8 @@
             width: 100%;
         }
 
-        /* Stile per i bottoni "Accedi / Registrati" e "Vai alla Dashboard" */
+        /* Stile per i bottoni "Accedi / Registrati"*/
         .btn-auth-register,
-        .btn-dashboard,
         .btn-demo { /* Aggiunto anche il bottone della demo */
             background-color: var(--primary-green); /* Usa il verde primario */
             color: white;
@@ -137,7 +136,6 @@
         }
 
         .btn-auth-register:hover,
-        .btn-dashboard:hover,
         .btn-demo:hover { /* Aggiunto anche il bottone della demo */
             background-color: var(--accent-green);
             transform: translateY(-1px);
@@ -561,7 +559,7 @@
                 width: 100%;
             }
             .navbar .auth-buttons .btn-auth-register,
-            .navbar .auth-buttons .btn-dashboard {
+            .navbar .auth-buttons {
                 width: 80%; /* I bottoni sono l'80% della larghezza del menu mobile */
                 text-align: center;
                 margin-left: 0; /* Rimuovi margine a sinistra per mobile */
@@ -660,7 +658,6 @@
         <li><a href="#contatti"><i class="fas fa-envelope"></i> Contatti</a></li>
         <li class="desktop-only">
             <a href="auth.html" class="btn-auth-register">Accedi / Registrati</a>
-            <a href="dashboard.html" class="btn-dashboard">Vai alla Dashboard</a>
         </li>
     </ul>
 

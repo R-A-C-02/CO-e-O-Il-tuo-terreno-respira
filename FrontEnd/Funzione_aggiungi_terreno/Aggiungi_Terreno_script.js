@@ -132,7 +132,8 @@ function stimaCO2(speciesArray, area_ha) {
 // --- Eventi di Disegno Mappa per la Mappa Principale ---
 function onMapPolygonCreated(e) {
     if (!selectedTerrenoId) {
-        alert("Seleziona o aggiungi un terreno dalla lista 'I miei terreni' prima di disegnare sulla mappa.");
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert("Seleziona o aggiungi un terreno dalla lista 'I miei terreni' prima di disegnare sulla mappa.");
         mainDrawnItems.removeLayer(e.layer);
         return;
     }
@@ -146,7 +147,12 @@ function onMapPolygonCreated(e) {
         selectedTerreno.leafletLayer.setStyle(selectedStilePoligono);
         mainDrawnItems.addLayer(selectedTerreno.leafletLayer);
 
-        selectedTerreno.coordinate = selectedTerreno.leafletLayer.getLatLngs();
+        // Salva le coordinate in un formato semplice (array di oggetti {lat, lng})
+        selectedTerreno.coordinate = selectedTerreno.leafletLayer.getLatLngs()[0].map(latlng => ({
+            lat: latlng.lat,
+            lng: latlng.lng
+        }));
+        
         selectedTerreno.area_ha = parseFloat(calcolaArea(selectedTerreno.leafletLayer));
         selectedTerreno.perimetro_m = parseFloat(calcolaPerimetro(selectedTerreno.leafletLayer));
 
@@ -155,13 +161,16 @@ function onMapPolygonCreated(e) {
 
         selectedTerreno.leafletLayer.bindPopup(`Area: ${selectedTerreno.area_ha} ha<br>Perimetro: ${selectedTerreno.perimetro_m} m`).openPopup();
 
-        alert(`Poligono disegnato per "${selectedTerreno.name}". Clicca 'Salva dati terreno' per aggiornare.`);
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert(`Poligono disegnato per "${selectedTerreno.name}". Clicca 'Salva dati terreno' per aggiornare.`);
 
-        // Mostra le sezioni indirizzo e centroide
-        document.getElementById('address-section').style.display = 'flex';
+        // Mostra le sezioni indirizzo, centroide e vertici (solo centroide e vertici rimangono)
         document.getElementById('coordinates-section').style.display = 'flex';
-        // Aggiorna indirizzo e centroide
+        document.getElementById('polygon-vertices-section').style.display = 'block'; // Mostra la nuova sezione
+        
+        // Aggiorna indirizzo, centroide e vertici
         updateAddressAndCoordinates();
+        displayPolygonVertices(selectedTerreno.coordinate); // Chiama la nuova funzione
         updateDashboard(); // Aggiorna la dashboard dopo la creazione del poligono
     }
 }
@@ -170,7 +179,12 @@ function onMapLayerEdited(e) {
     e.layers.eachLayer(layer => {
         const terreno = terreni.find(t => t.leafletLayer && L.Util.stamp(t.leafletLayer) === L.Util.stamp(layer));
         if (terreno) {
-            terreno.coordinate = layer.getLatLngs();
+            // Aggiorna le coordinate in un formato semplice (array di oggetti {lat, lng})
+            terreno.coordinate = layer.getLatLngs()[0].map(latlng => ({
+                lat: latlng.lat,
+                lng: latlng.lng
+            }));
+
             terreno.area_ha = parseFloat(calcolaArea(layer));
             terreno.perimetro_m = parseFloat(calcolaPerimetro(layer));
 
@@ -180,10 +194,12 @@ function onMapLayerEdited(e) {
             }
 
             layer.bindPopup(`Area: ${terreno.area_ha} ha<br>Perimetro: ${terreno.perimetro_m} m`).openPopup();
-            alert(`Poligono per "${terreno.name}" modificato. Clicca 'Salva dati terreno' per aggiornare.`);
+            // Usa una modale personalizzata invece di alert()
+            showCustomAlert(`Poligono per "${terreno.name}" modificato. Clicca 'Salva dati terreno' per aggiornare.`);
 
-            // Aggiorna indirizzo e centroide dopo la modifica
+            // Aggiorna indirizzo, centroide e vertici dopo la modifica
             updateAddressAndCoordinates();
+            displayPolygonVertices(terreno.coordinate); // Chiama la nuova funzione
             updateDashboard(); // Aggiorna la dashboard dopo la modifica del poligono
         }
     });
@@ -194,7 +210,7 @@ function onMapLayerDeleted(e) {
         const terreno = terreni.find(t => t.leafletLayer && L.Util.stamp(t.leafletLayer) === L.Util.stamp(layer));
         if (terreno) {
             terreno.leafletLayer = null;
-            terreno.coordinate = [];
+            terreno.coordinate = []; // Pulisci le coordinate
             terreno.area_ha = 0;
             terreno.perimetro_m = 0;
 
@@ -202,15 +218,43 @@ function onMapLayerDeleted(e) {
                 document.getElementById("area").value = "Disegna sulla mappa";
                 document.getElementById("perimetro").value = "Disegna sulla mappa";
             }
-            alert(`Poligono per "${terreno.name}" eliminato. Clicca 'Salva dati terreno' per aggiornare.`);
+            // Usa una modale personalizzata invece di alert()
+            showCustomAlert(`Poligono per "${terreno.name}" eliminato. Clicca 'Salva dati terreno' per aggiornare.`);
 
-            // Pulisce le informazioni di indirizzo e centroide
-            document.getElementById("address-display").textContent = "Nessun indirizzo trovato.";
+            // Pulisce le informazioni di indirizzo, centroide e vertici
             document.getElementById("centroid-display").textContent = "Centroide: N/A";
+            document.getElementById("vertices-display").innerHTML = "Nessun poligono selezionato o disegnato."; // Pulisci i vertici
+            document.getElementById('polygon-vertices-section').style.display = 'none'; // Nascondi la sezione
             updateDashboard(); // Aggiorna la dashboard dopo l'eliminazione del poligono
         }
     });
 }
+
+// Nuova funzione per visualizzare le coordinate dei vertici
+function displayPolygonVertices(coordinates) {
+    const verticesDisplay = document.getElementById('vertices-display');
+    verticesDisplay.innerHTML = ''; // Pulisci il contenuto precedente
+
+    if (!coordinates || coordinates.length === 0) {
+        verticesDisplay.innerHTML = 'Nessun poligono selezionato o disegnato.';
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    ul.style.maxHeight = '200px'; // Limita l'altezza
+    ul.style.overflowY = 'auto'; // Aggiungi scroll se necessario
+
+    coordinates.forEach((coord, index) => {
+        const li = document.createElement('li');
+        li.textContent = `Vertice ${index + 1}: Latitudine ${coord.lat.toFixed(6)}, Longitudine ${coord.lng.toFixed(6)}`;
+        li.style.marginBottom = '5px';
+        ul.appendChild(li);
+    });
+    verticesDisplay.appendChild(ul);
+}
+
 
 // --- Sidebar Terrain Management Functions ---
 function renderTerreniList() {
@@ -220,8 +264,8 @@ function renderTerreniList() {
     if (terreni.length === 0) {
         terrenoListUl.innerHTML = '<li style="text-align: center; color: var(--text-color); opacity: 0.7;">Nessun terreno aggiunto.</li>';
         document.getElementById('selected-terrain-details').style.display = 'none';
-        document.getElementById('address-section').style.display = 'none';
         document.getElementById('coordinates-section').style.display = 'none';
+        document.getElementById('polygon-vertices-section').style.display = 'none'; // Nascondi la sezione vertici
         mainDrawnItems.clearLayers();
         return;
     }
@@ -237,10 +281,21 @@ function renderTerreniList() {
         const terrainNameSpan = document.createElement('span');
         terrainNameSpan.classList.add('terreno-name');
         terrainNameSpan.textContent = t.name;
-        terrainNameSpan.ondblclick = (e) => { e.stopPropagation(); editTerrenoName(t.id); };
+        // Rimosso il dblclick per l'edit, ora c'è un pulsante dedicato
+        // terrainNameSpan.ondblclick = (e) => { e.stopPropagation(); editTerrenoName(t.id); };
 
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('terreno-actions');
+
+        // Pulsante Modifica Nome (spostato qui)
+        const editButton = document.createElement('button');
+        editButton.innerHTML = '<i class="fas fa-edit"></i>';
+        editButton.title = 'Modifica Nome';
+        editButton.onclick = (e) => {
+            e.stopPropagation();
+            editTerrenoName(t.id);
+        };
+        actionsDiv.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
         deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
@@ -260,8 +315,14 @@ function renderTerreniList() {
     });
     // Assicurati che le sezioni siano visibili una volta che ci sono terreni
     document.getElementById('selected-terrain-details').style.display = 'flex';
-    document.getElementById('address-section').style.display = 'flex';
     document.getElementById('coordinates-section').style.display = 'flex';
+    // Mostra la sezione vertici se c'è un terreno selezionato con un poligono
+    const selectedTerreno = terreni.find(t => t.id === selectedTerrenoId);
+    if (selectedTerreno && selectedTerreno.leafletLayer) {
+        document.getElementById('polygon-vertices-section').style.display = 'block';
+    } else {
+        document.getElementById('polygon-vertices-section').style.display = 'none';
+    }
 }
 
 function addTerreno() {
@@ -269,7 +330,8 @@ function addTerreno() {
     let newName = input.value.trim();
 
     if (!newName) {
-        alert('Inserisci un nome per il nuovo terreno.');
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert('Inserisci un nome per il nuovo terreno.');
         return;
     }
 
@@ -287,7 +349,7 @@ function addTerreno() {
         area_ha: 0,
         perimetro_m: 0,
         co2_kg_annuo: 0,
-        coordinate: [],
+        coordinate: [], // Inizializza come array vuoto
         leafletLayer: null
     };
 
@@ -295,7 +357,10 @@ function addTerreno() {
     input.value = `Nuovo Terreno`;
     renderTerreniList();
     selectTerreno(newTerreno.id);
-    alert(`Terreno "${newName}" aggiunto. Ora puoi disegnarlo sulla mappa e aggiungere le specie.`);
+    // Pulisci il marker dell'indirizzo quando viene aggiunto un nuovo terreno
+    clearAddressMarker(); // Solo il marker, non l'input
+    // Usa una modale personalizzata invece di alert()
+    showCustomAlert(`Terreno "${newName}" aggiunto. Ora puoi disegnarlo sulla mappa e aggiungere le specie.`);
 }
 
 function selectTerreno(id) {
@@ -320,6 +385,9 @@ function selectTerreno(id) {
         newSelectedLi.classList.add('selected');
     }
 
+    // Pulisci qualsiasi marker di indirizzo esistente quando viene selezionato un nuovo terreno
+    clearAddressMarker(); // Solo il marker, non l'input
+
     // Aggiorna i dettagli del terreno nel pannello principale
     const terreno = terreni.find(t => t.id === id);
     if (terreno) {
@@ -332,21 +400,22 @@ function selectTerreno(id) {
         document.getElementById("new-species-name-input").value = "";
         document.getElementById("new-species-quantity-input").value = "";
 
-        // Visualizza le sezioni indirizzo e coordinate se un terreno è selezionato
+        // Visualizza le sezioni indirizzo, coordinate e vertici se un terreno è selezionato
         document.getElementById('selected-terrain-details').style.display = 'flex';
-        document.getElementById('address-section').style.display = 'flex';
         document.getElementById('coordinates-section').style.display = 'flex';
-
-
+        
         if (terreno.leafletLayer) {
             terreno.leafletLayer.setStyle(selectedStilePoligono);
             mainMap.fitBounds(terreno.leafletLayer.getBounds(), { padding: [20, 20], maxZoom: 16 });
             updateAddressAndCoordinates(); // Aggiorna indirizzo e centroide
+            displayPolygonVertices(terreno.coordinate); // Mostra i vertici
+            document.getElementById('polygon-vertices-section').style.display = 'block'; // Mostra la sezione
         } else {
             // Se non c'è un poligono disegnato per il terreno selezionato, pulisci le info
-            document.getElementById("address-display").textContent = "Nessun indirizzo trovato.";
             document.getElementById("centroid-display").textContent = "Centroide: N/A";
-            mainMap.setView([42.5, 12.5], 6); // Torna alla vista predefinita
+            document.getElementById("vertices-display").innerHTML = "Nessun poligono selezionato o disegnato."; // Pulisci i vertici
+            document.getElementById('polygon-vertices-section').style.display = 'none'; // Nascondi la sezione
+            // Rimosso: mainMap.setView([42.5, 12.5], 6); // Non resettare la vista della mappa
         }
         mainMap.invalidateSize();
         // Aggiorna la dashboard per riflettere l'area del terreno selezionato
@@ -358,51 +427,62 @@ function editTerrenoName(id) {
     const terreno = terreni.find(t => t.id === id);
     if (!terreno) return;
 
-    const newName = prompt(`Modifica nome per "${terreno.name}":`, terreno.name);
-    if (newName !== null && newName.trim() !== '' && newName.trim() !== terreno.name) {
-        terreno.name = newName.trim();
-        renderTerreniList();
-        if (selectedTerrenoId === id) {
-            document.getElementById("current-terrain-name").textContent = terreno.name;
+    // Usa una modale personalizzata per il prompt
+    showCustomPrompt(`Modifica nome per "${terreno.name}":`, terreno.name, (newName) => {
+        if (newName !== null && newName.trim() !== '' && newName.trim() !== terreno.name) {
+            terreno.name = newName.trim();
+            renderTerreniList();
+            if (selectedTerrenoId === id) {
+                document.getElementById("current-terrain-name").textContent = terreno.name;
+            }
+            updateTerreniTable();
+            updateAllLayerPopups();
         }
-        updateTerreniTable();
-        updateAllLayerPopups();
-    }
+    });
 }
 
 function deleteTerreno(id) {
-    if (!confirm('Sei sicuro di voler eliminare questo terreno?')) {
-        return;
-    }
-
-    const index = terreni.findIndex(t => t.id === id);
-    if (index > -1) {
-        const terrainToDelete = terreni[index];
-        if (terrainToDelete.leafletLayer) {
-            mainDrawnItems.removeLayer(terrainToDelete.leafletLayer); // Rimuove il poligono dalla mappa
+    // Usa una modale personalizzata per la conferma
+    showCustomConfirm('Sei sicuro di voler eliminare questo terreno?', (confirmed) => {
+        if (!confirmed) {
+            return;
         }
-        terreni.splice(index, 1); // Rimuove il terreno dall'array
 
-        // Gestione della selezione dopo l'eliminazione
-        if (selectedTerrenoId === id) {
-            selectedTerrenoId = null; // Nessun terreno selezionato
-            if (terreni.length > 0) {
-                selectTerreno(terreni[0].id); // Seleziona il primo terreno se esiste
-            } else {
-                // Nasconde e pulisce le sezioni se non ci sono più terreni
-                document.getElementById('selected-terrain-details').style.display = 'none';
-                document.getElementById('address-section').style.display = 'none';
-                document.getElementById('coordinates-section').style.display = 'none';
-                document.getElementById("current-terrain-name").textContent = "";
-                document.getElementById("area").value = "Disegna sulla mappa";
-                document.getElementById("perimetro").value = "Disegna sulla mappa";
-                renderSpeciesListForSelectedTerrain();
-                mainDrawnItems.clearLayers(); // Pulisce la mappa
+        const index = terreni.findIndex(t => t.id === id);
+        if (index > -1) {
+            const terrainToDelete = terreni[index];
+            if (terrainToDelete.leafletLayer) {
+                mainDrawnItems.removeLayer(terrainToDelete.leafletLayer); // Rimuove il poligono dalla mappa
+            }
+            terreni.splice(index, 1); // Rimuove il terreno dall'array
+
+            // Gestione della selezione dopo l'eliminazione
+            if (selectedTerrenoId === id) {
+                selectedTerrenoId = null; // Nessun terreno selezionato
+                if (terreni.length > 0) {
+                    selectTerreno(terreni[0].id); // Seleziona il primo terreno se esiste
+                } else {
+                    // Nasconde e pulisce le sezioni se non ci sono più terreni
+                    document.getElementById('selected-terrain-details').style.display = 'none';
+                    document.getElementById('coordinates-section').style.display = 'none';
+                    document.getElementById('polygon-vertices-section').style.display = 'none'; // Nascondi la sezione vertici
+                    document.getElementById("current-terrain-name").textContent = "";
+                    document.getElementById("area").value = "Disegna sulla mappa";
+                    document.getElementById("perimetro").value = "Disegna sulla mappa";
+                    document.getElementById("vertices-display").innerHTML = "Nessun poligono selezionato o disegnato."; // Pulisci i vertici
+                    renderSpeciesListForSelectedTerrain();
+                    mainDrawnItems.clearLayers(); // Pulisce la mappa
+                }
+            }
+            renderTerreniList(); // Aggiorna la lista nella sidebar
+            updateDashboard(); // Aggiorna i totali e i grafici/tabelle
+
+            // Se non ci sono più terreni o il terreno selezionato è stato eliminato, pulisci il marker dell'indirizzo
+            if (terreni.length === 0 || selectedTerrenoId === null) {
+                clearAddressMarkerAndInput(); // Pulisci sia il marker che l'input
             }
         }
-        renderTerreniList(); // Aggiorna la lista nella sidebar
-        updateDashboard(); // Aggiorna i totali e i grafici/tabelle
-    }
+    });
 }
 
 // --- Funzioni di Gestione Specie ---
@@ -438,12 +518,14 @@ function addSpeciesToSelectedTerrain() {
     const quantity = newSpeciesQuantityInput.value.trim();
 
     if (!name) {
-        alert("Inserisci il nome della specie.");
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert("Inserisci il nome della specie.");
         return;
     }
 
     if (!selectedTerrenoId) {
-        alert("Seleziona un terreno prima di aggiungere specie.");
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert("Seleziona un terreno prima di aggiungere specie.");
         return;
     }
 
@@ -453,7 +535,8 @@ function addSpeciesToSelectedTerrain() {
         newSpeciesNameInput.value = '';
         newSpeciesQuantityInput.value = '';
         renderSpeciesListForSelectedTerrain();
-        alert(`Specie "${name}" aggiunta al terreno "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno' per salvare le modifiche.`);
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert(`Specie "${name}" aggiunta al terreno "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno' per salvare le modifiche.`);
     }
 }
 
@@ -462,42 +545,52 @@ function editSpeciesInSelectedTerrain(index) {
     if (!selectedTerreno || !selectedTerreno.species[index]) return;
 
     const currentSpecies = selectedTerreno.species[index];
-    const newName = prompt(`Modifica nome specie per "${selectedTerreno.name}":`, currentSpecies.name);
-    if (newName === null) return;
+    
+    // Usa una modale personalizzata per il prompt
+    showCustomPrompt(`Modifica nome specie per "${selectedTerreno.name}":`, currentSpecies.name, (newName) => {
+        if (newName === null) return; // L'utente ha annullato
 
-    const newQuantity = prompt(`Modifica quantità/densità per "${newName}":`, currentSpecies.quantity);
-    if (newQuantity === null) return;
+        showCustomPrompt(`Modifica quantità/densità per "${newName}":`, currentSpecies.quantity, (newQuantity) => {
+            if (newQuantity === null) return; // L'utente ha annullato
 
-    if (newName.trim() !== '') {
-        selectedTerreno.species[index] = { name: newName.trim(), quantity: newQuantity.trim() };
-        renderSpeciesListForSelectedTerrain();
-        alert(`Specie modificata per "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno'.`);
-    } else {
-        alert("Il nome della specie non può essere vuoto.");
-    }
+            if (newName.trim() !== '') {
+                selectedTerreno.species[index] = { name: newName.trim(), quantity: newQuantity.trim() };
+                renderSpeciesListForSelectedTerrain();
+                // Usa una modale personalizzata invece di alert()
+                showCustomAlert(`Specie modificata per "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno'.`);
+            } else {
+                // Usa una modale personalizzata invece di alert()
+                showCustomAlert("Il nome della specie non può essere vuoto.");
+            }
+        });
+    });
 }
 
 function deleteSpeciesFromSelectedTerrain(index) {
-    if (!confirm('Sei sicuro di voler eliminare questa specie?')) return;
+    // Usa una modale personalizzata per la conferma
+    showCustomConfirm('Sei sicuro di voler eliminare questa specie?', (confirmed) => {
+        if (!confirmed) return;
 
-    const selectedTerreno = terreni.find(t => t.id === selectedTerrenoId);
-    if (selectedTerreno && selectedTerreno.species[index]) {
-        selectedTerreno.species.splice(index, 1);
-        renderSpeciesListForSelectedTerrain();
-        alert(`Specie eliminata dal terreno "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno'.`);
-    }
+        const selectedTerreno = terreni.find(t => t.id === selectedTerrenoId);
+        if (selectedTerreno && selectedTerreno.species[index]) {
+            selectedTerreno.species.splice(index, 1);
+            renderSpeciesListForSelectedTerrain();
+            // Usa una modale personalizzata invece di alert()
+            showCustomAlert(`Specie eliminata dal terreno "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno'.`);
+        }
+    });
 }
 
 // --- Funzione Salva Dati (modificata per specie multiple) ---
-function saveData() {
+async function saveData() {
     if (!selectedTerrenoId) {
-        alert("Nessun terreno selezionato per il salvataggio dei dati. Aggiungi o seleziona un terreno.");
+        showCustomAlert("Nessun terreno selezionato per il salvataggio dei dati. Aggiungi o seleziona un terreno.");
         return;
     }
 
     const terreno = terreni.find(t => t.id === selectedTerrenoId);
     if (!terreno) {
-        alert("Errore: Terreno selezionato non trovato.");
+        showCustomAlert("Errore: Terreno selezionato non trovato.");
         return;
     }
 
@@ -520,22 +613,87 @@ function saveData() {
     }
 
     updateDashboard();
-    alert(`Dati per "${terreno.name}" salvati!`);
+    showCustomAlert(`Dati per "${terreno.name}" salvati!`);
+
+    // --- Integrazione Backend: Invia i dati al server ---
+    // URL CORRETTO del tuo server backend Flask
+    const backendUrl = 'http://localhost:3001/save-coordinates';
+
+    // Recupera le coordinate del centroide e dei vertici per il terreno selezionato
+    let centroidCoords = null;
+    const centroidDisplay = document.getElementById("centroid-display").textContent;
+    const centroidMatch = centroidDisplay.match(/Lat ([\d.]+), Lon ([\d.]+)/);
+    if (centroidMatch) {
+        centroidCoords = {
+            lat: parseFloat(centroidMatch[1]),
+            lng: parseFloat(centroidMatch[2])
+        };
+    }
+    
+    // Le coordinate dei vertici sono già nell'oggetto terreno.coordinate
+    const polygonVertices = terreno.coordinate;
+
+    try {
+        const response = await fetch(backendUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                // Invia solo le coordinate del centroide e dei vertici
+                centroid: centroidCoords,
+                vertices: polygonVertices
+                // Puoi aggiungere altri dati del terreno qui se il tuo backend li gestisce
+                // name: terreno.name,
+                // area_ha: terreno.area_ha,
+                // ...
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Errore salvataggio dati backend: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('Dati inviati al backend con successo:', result);
+        showCustomAlert('Dati terreno inviati al backend con successo!');
+
+    } catch (error) {
+        console.error('Errore durante l\'invio dei dati al backend:', error);
+        showCustomAlert('Errore durante il salvataggio dei dati nel backend. Controlla la console per i dettagli.');
+    }
 }
 
-// --- Funzione di Ricerca Indirizzo ---
-function goToLocation() {
-    const indirizzo = document.getElementById("indirizzo_search").value.trim();
+// Funzione helper per pulire solo il marker dell'indirizzo
+function clearAddressMarker() {
+    if (markerIndirizzo) {
+        mainMap.removeLayer(markerIndirizzo);
+        markerIndirizzo = null;
+    }
+}
+
+// Nuova funzione per pulire il marker E il campo di input
+function clearAddressMarkerAndInput() {
+    clearAddressMarker(); // Pulisci il marker
+    document.getElementById('indirizzo_search_sidebar').value = ''; // Pulisci il campo di input
+}
+
+// --- Funzione di Ricerca Indirizzo (Aggiornata per la sidebar) ---
+function goToLocationSidebar() {
+    const indirizzo = document.getElementById("indirizzo_search_sidebar").value.trim();
     if (!indirizzo) {
-        alert("Inserisci un indirizzo valido.");
+        showCustomAlert("Inserisci un indirizzo valido.");
         return;
     }
+
+    clearAddressMarker(); // Pulisci il marker esistente prima di una nuova ricerca (ma non l'input)
 
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(indirizzo)}`)
         .then(response => response.json())
         .then(data => {
             if (data.length === 0) {
-                alert("Indirizzo non trovato.");
+                showCustomAlert("Indirizzo non trovato.");
                 return;
             }
             const lat = data[0].lat;
@@ -543,17 +701,15 @@ function goToLocation() {
 
             mainMap.setView([lat, lon], 16);
 
-            if (markerIndirizzo) {
-                mainMap.removeLayer(markerIndirizzo);
-            }
-
             markerIndirizzo = L.marker([lat, lon]).addTo(mainMap)
                 .bindPopup("Indirizzo trovato: " + indirizzo)
                 .openPopup();
         })
         .catch(error => {
-            alert("Errore nella ricerca dell'indirizzo.");
+            showCustomAlert("Errore nella ricerca dell'indirizzo.");
             console.error(error);
+            // In caso di errore, assicurati che il marker sia comunque pulito
+            clearAddressMarker();
         });
 }
 
@@ -660,27 +816,26 @@ function updateAddressAndCoordinates() {
 
                     reverseGeocode(centroidCoordsForAddress[1], centroidCoordsForAddress[0])
                         .then(address => {
-                            document.getElementById("address-display").textContent = address;
+                            // document.getElementById("address-display").textContent = address; // Rimosso
                         })
                         .catch(error => {
-                            document.getElementById("address-display").textContent = "Indirizzo non trovato.";
+                            // document.getElementById("address-display").textContent = "Indirizzo non trovato."; // Rimosso
                             console.error("Errore di geocodifica inversa:", error);
                         });
                 } catch (e) {
                     console.error("Errore nel calcolo del centroide per la geocodifica indirizzo:", e);
-                    document.getElementById("address-display").textContent = "Nessun indirizzo trovato (errore calcolo centroide per indirizzo).";
+                    // document.getElementById("address-display").textContent = "Nessun indirizzo trovato (errore calcolo centroide per indirizzo)."; // Rimosso
                 }
             } else {
-                document.getElementById("address-display").textContent = "Nessun indirizzo trovato (poligono troppo piccolo/non valido).";
+                // document.getElementById("address-display").textContent = "Nessun indirizzo trovato (poligono troppo piccolo/non valido)."; // Rimosso
             }
         } else {
             console.warn("Turf.js non disponibile o poligono non valido per geocodifica inversa dell'indirizzo.");
-            document.getElementById("address-display").textContent = "Nessun indirizzo trovato.";
+            // document.getElementById("address-display").textContent = "Nessun indirizzo trovato."; // Rimosso
         }
 
     } else {
         // Se nessun terreno è selezionato o il terreno selezionato non ha un poligono disegnato
-        document.getElementById("address-display").textContent = "Nessun indirizzo trovato.";
         document.getElementById("centroid-display").textContent = "Centroide: N/A";
     }
 }
@@ -721,7 +876,7 @@ function updateAllMapLayers() {
             mainMap.fitBounds(mainDrawnItems.getBounds(), { padding: [20, 20] });
         }
     } else {
-        mainMap.setView([42.5, 12.5], 6);
+        // Rimosso: mainMap.setView([42.5, 12.5], 6); // Non resettare la vista della mappa
     }
 }
 
@@ -739,7 +894,8 @@ function updateAllLayerPopups() {
 
 function esportaDati() {
     if (terreni.length === 0) {
-        alert("Nessun terreno salvato.");
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert("Nessun terreno salvato.");
         return;
     }
 
@@ -749,7 +905,8 @@ function esportaDati() {
         area_ha: t.area_ha,
         perimetro_m: t.perimetro_m,
         assorbimento_CO2_annuo_kg: t.co2_kg_annuo,
-        coordinate: t.coordinate ? t.coordinate[0].map(latlng => [latlng.lat, latlng.lng]) : []
+        // Esporta le coordinate nel formato {lat, lng}
+        coordinate: t.coordinate || [] 
     }));
 
     const blob = new Blob([JSON.stringify(dati, null, 2)], {type: "application/json"});
@@ -764,7 +921,8 @@ function esportaDati() {
 function applicaFiltro() {
     const filtro = document.getElementById("filtro-specie").value.trim().toLowerCase();
     if (!filtro) {
-        alert("Inserisci una specie per filtrare.");
+        // Usa una modale personalizzata invece di alert()
+        showCustomAlert("Inserisci una specie per filtrare.");
         return;
     }
 
@@ -802,10 +960,13 @@ function updateDashboard() {
     // Se un terreno è selezionato, usa la sua area; altrimenti, l'area è 0.
     const areaForDisplay = selectedTerreno ? parseFloat(selectedTerreno.area_ha || 0).toFixed(2) : '0.00';
 
+    // Se un terreno è selezionato, usa la sua CO2 assorbita; altrimenti, la CO2 è 0.
+    const co2ForDisplay = selectedTerreno ? parseFloat(selectedTerreno.co2_kg_annuo || 0).toFixed(2) : '0.00';
+
     // Aggiorna la casella "Area Totale (ha)" con l'area del terreno selezionato
     document.getElementById("total-area").textContent = areaForDisplay;
 
-    document.getElementById("total-co2").textContent = totalCO2; // Lascia questa riga per CO2 totale
+    document.getElementById("total-co2").textContent = co2ForDisplay; // Lascia questa riga per CO2 totale
 
     updateTerreniTable();
     updateCO2Chart();
@@ -818,22 +979,27 @@ function updateTerreniTable() {
 
     terreni.forEach(t => {
         const row = tableBody.insertRow();
+<<<<<<< HEAD
+        // Aggiungi l'attributo data-label a ogni cella per la responsività
+        const cell1 = row.insertCell();
+        cell1.textContent = t.name;
+        cell1.setAttribute('data-label', 'Nome Terreno');
+
+        const cell2 = row.insertCell();
+        cell2.textContent = t.species.map(s => `${s.name} (${s.quantity})`).join(', ') || 'N/A';
+        cell2.setAttribute('data-label', 'Specie');
+
+        const cell3 = row.insertCell();
+        cell3.textContent = t.area_ha || '0.00';
+        cell3.setAttribute('data-label', 'Area (ha)');
+=======
         row.insertCell().textContent = t.name;
         row.insertCell().textContent = t.species.map(s => `${s.name} (${s.quantity})`).join(', ') || 'N/A';
         row.insertCell().textContent = t.area_ha || '0.00';
         row.insertCell().textContent = t.co2_kg_annuo || '0.00';
         const actionsCell = row.insertCell(); // <-- Creazione corretta della cella per i pulsanti
-
-        const selectButton = document.createElement('button');
-        selectButton.innerHTML = '<i class="fas fa-map-marker-alt"></i>';
-        selectButton.title = 'Seleziona Terreno';
-        selectButton.style.color = 'var(--primary-blue)';
-        selectButton.onclick = (e) => {
-            e.stopPropagation();
-            selectTerreno(t.id);
-        };
-        actionsCell.appendChild(selectButton);
-
+        actionsCell.classList.add('actions-cell'); ////
+        
         const editButton = document.createElement('button');
         editButton.innerHTML = '<i class="fas fa-edit"></i>';
         editButton.title = 'Modifica Nome';
@@ -842,15 +1008,11 @@ function updateTerreniTable() {
             editTerrenoName(t.id);
         };
         actionsCell.appendChild(editButton);
+>>>>>>> 16b11b4eac7095159b938f7a08a44e3f984419c9
 
-        const deleteButton = document.createElement('button');
-        deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteButton.title = 'Elimina Terreno';
-        deleteButton.onclick = (e) => {
-            e.stopPropagation();
-            deleteTerreno(t.id);
-        };
-        actionsCell.appendChild(deleteButton);
+        const cell4 = row.insertCell();
+        cell4.textContent = t.co2_kg_annuo || '0.00';
+        cell4.setAttribute('data-label', 'CO₂ Assorbita (kg/anno)');
     });
 }
 
@@ -953,10 +1115,208 @@ function toggleSidebar() {
 
 // --- Funzione per utilizzare i dati catastali ---
 function useCadastralData() {
-    alert("Funzione 'Utilizza dati catastali' ancora da implementare.");
+    // Usa una modale personalizzata invece di alert()
+    showCustomAlert("Funzione 'Utilizza dati catastali' ancora da implementare.");
     // Qui andrebbe la logica per integrare i dati catastali,
     // ad esempio, aprendo un popup o una nuova interfaccia per la ricerca.
 }
+
+// --- Funzioni per modali personalizzate (sostituzione di alert/confirm/prompt) ---
+function createModal(type, message, defaultValue = '', callback = null) {
+    // Rimuovi eventuali modali esistenti per evitare sovrapposizioni
+    const existingModal = document.getElementById('custom-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'custom-modal';
+    modalOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background-color: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        font-family: 'Roboto', sans-serif;
+        color: var(--text-color);
+        position: relative; /* Per il pulsante di chiusura */
+    `;
+
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '&times;'; // Simbolo 'x'
+    closeButton.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #aaa;
+        width: 30px; /* Rendi cliccabile più facilmente */
+        height: 30px;
+        padding: 0;
+        line-height: 1; /* Allinea la 'x' al centro */
+    `;
+    closeButton.onclick = () => {
+        document.body.removeChild(modalOverlay);
+        if (callback && type === 'prompt') {
+            callback(null); // Invia null se l'utente chiude il prompt
+        }
+    };
+    modalContent.appendChild(closeButton);
+
+    const messagePara = document.createElement('p');
+    messagePara.textContent = message;
+    messagePara.style.cssText = `
+        margin-bottom: 20px;
+        font-size: 1.1em;
+        line-height: 1.4;
+        padding-top: 10px; /* Spazio per la 'x' */
+    `;
+    modalContent.appendChild(messagePara);
+
+    if (type === 'prompt') {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = defaultValue;
+        input.style.cssText = `
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1em;
+        `;
+        modalContent.appendChild(input);
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'OK';
+        confirmBtn.style.cssText = `
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            width: auto; /* Sovrascrivi il 100% */
+        `;
+        confirmBtn.onclick = () => {
+            document.body.removeChild(modalOverlay);
+            if (callback) callback(input.value);
+        };
+        modalContent.appendChild(confirmBtn);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Annulla';
+        cancelBtn.style.cssText = `
+            background-color: #ccc;
+            color: var(--text-color);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: auto; /* Sovrascrivi il 100% */
+        `;
+        cancelBtn.onclick = () => {
+            document.body.removeChild(modalOverlay);
+            if (callback) callback(null);
+        };
+        modalContent.appendChild(cancelBtn);
+
+        input.focus(); // Metti il focus sull'input
+    } else if (type === 'confirm') {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Sì';
+        confirmBtn.style.cssText = `
+            background-color: var(--primary-green);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            width: auto; /* Sovrascrivi il 100% */
+        `;
+        confirmBtn.onclick = () => {
+            document.body.removeChild(modalOverlay);
+            if (callback) callback(true);
+        };
+        modalContent.appendChild(confirmBtn);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'No';
+        cancelBtn.style.cssText = `
+            background-color: #ccc;
+            color: var(--text-color);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: auto; /* Sovrascrivi il 100% */
+        `;
+        cancelBtn.onclick = () => {
+            document.body.removeChild(modalOverlay);
+            if (callback) callback(false);
+        };
+        modalContent.appendChild(cancelBtn);
+    } else { // type === 'alert'
+        const okBtn = document.createElement('button');
+        okBtn.textContent = 'OK';
+        okBtn.style.cssText = `
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: auto; /* Sovrascrivi il 100% */
+        `;
+        okBtn.onclick = () => {
+            document.body.removeChild(modalOverlay);
+            if (callback) callback();
+        };
+        modalContent.appendChild(okBtn);
+    }
+
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+}
+
+function showCustomAlert(message, callback = null) {
+    createModal('alert', message, '', callback);
+}
+
+function showCustomConfirm(message, callback) {
+    createModal('confirm', message, '', callback);
+}
+
+function showCustomPrompt(message, defaultValue, callback) {
+    createModal('prompt', message, defaultValue, callback);
+}
+
 
 // --- Inizializzazione ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -966,11 +1326,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTerreniList(); // Renderizza la lista dei terreni
         updateDashboard(); // Aggiorna la dashboard con i totali
 
-        // Gestione della visibilità iniziale delle sezioni di indirizzo e centroide
+        // Gestione della visibilità iniziale delle sezioni di indirizzo, centroide e vertici
         // Saranno visibili solo se ci sono terreni con poligoni disegnati
         document.getElementById('selected-terrain-details').style.display = 'none';
-        document.getElementById('address-section').style.display = 'none';
         document.getElementById('coordinates-section').style.display = 'none';
+        document.getElementById('polygon-vertices-section').style.display = 'none'; // Nascondi la nuova sezione
 
         // Se ci sono terreni precaricati, prova a selezionare il primo per inizializzare la UI
         if (terreni.length > 0) {
@@ -978,5 +1338,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         document.getElementById("terreno-name-input").value = "Nuovo Terreno";
+
+        // Aggiungi l'event listener per il tasto Invio sulla casella di ricerca indirizzo
+        const indirizzoSearchInput = document.getElementById('indirizzo_search_sidebar');
+        if (indirizzoSearchInput) {
+            indirizzoSearchInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Evita il comportamento predefinito del tasto Invio (es. invio form)
+                    goToLocationSidebar();
+                }
+            });
+        }
+
     }, 1000); // Ritardo aumentato a 1000ms (1 secondo) per massima sicurezza
 });

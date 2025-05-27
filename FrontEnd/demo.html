@@ -228,7 +228,14 @@
             transform: none;
         }
 
-          .btn-home {
+        .bottone-container {
+            display: flex;
+            justify-content: center; /* centra orizzontalmente */
+            margin-top: auto;
+            margin-bottom: 40px; /* distanza dal fondo */
+        }
+
+        .btn-home {
             background-color: rgb(43, 96, 187);
             color: white;
             padding: 0.8rem 1.5rem;
@@ -339,7 +346,9 @@
                 </div>
             </div>
         </section>
+        <div class="bottone-container">
         <button class="btn-home" onclick="window.location.href='homepage_bottone_demo.html'">Torna alla Home</button>
+        </div>
     </main>
 
     <footer>

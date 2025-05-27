@@ -1,0 +1,679 @@
+:root {
+    --primary-green: #28a745;
+    --dark-green: #218838;
+    --primary-blue: #007bff;
+    --dark-blue: #0056b3;
+    --light-bg: #eef1f5;
+    --white-bg: #ffffff;
+    --border-color: #e0e0e0;
+    --text-color: #333;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --border-radius: 8px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-bg);
+    color: var(--text-color);
+}
+
+header {
+    background-color: var(--dark-green);
+    padding: 15px 30px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-title {
+    margin: 0;
+    color: white;
+    font-size: 1.8em;
+    font-weight: 700;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+    background-color: var(--primary-green); /* Aggiunto/Modificato questo */
+
+}
+
+.user-profile:hover {
+    background-color: #3cb371;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+
+.user-profile span {
+    font-weight: 700;
+    color: white;
+    font-size: 1.1em;
+}
+
+.hamburger-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    z-index: 1001;
+}
+
+.hamburger-button span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: var(--text-color);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-button:hover span {
+    background-color: var(--primary-green);
+}
+
+#container {
+    display: flex;
+    height: calc(100vh - 70px); /* Full viewport height minus header */
+    overflow: hidden;
+}
+
+#sidebar {
+    width: 350px;
+    background: var(--white-bg);
+    padding: 25px;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.3s ease, width 0.3s ease, padding 0.3s ease;
+    transform: translateX(0);
+    flex-shrink: 0;
+}
+
+#sidebar.hidden {
+    transform: translateX(-100%);
+    width: 0;
+    padding: 0;
+    border-right: none;
+    box-shadow: none;
+}
+
+#main-content-area {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap; /* Allows sections to wrap on smaller screens */
+    gap: 15px; /* Space between sections */
+    padding: 15px;
+    overflow-y: auto; /* Allows content to scroll if it overflows vertically */
+}
+
+#main-map-container {
+    flex: 1 1 48%; /* Allows map to grow/shrink, starts at ~48% width */
+    min-width: 400px; /* Minimum width for the map */
+    height: 500px; /* Fixed height for the map */
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+#main-map-container .leaflet-container {
+    height: 100%;
+    width: 100%;
+}
+
+#selected-terrain-details {
+    flex: 1 1 48%;
+    min-width: 300px;
+    background-color: var(--white-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Common styles for dashboard sections */
+.dashboard-section {
+    background-color: var(--white-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 0; /* Remove default margin-bottom, gap handles it */
+    flex: 1 1 100%; /* Make them take full width below map/details initially, adjusted by .info-panel-row */
+}
+
+/* Styles for new Address and Coordinates sections */
+#coordinates-section,
+#polygon-vertices-section { /* Aggiunto la nuova sezione */
+    background-color: var(--white-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    flex: 1 1 calc(33% - 10px); /* Adjusted to sit side-by-side below the map/details, accounting for gap */
+    min-width: 300px; /* Ensure they don't get too small */
+    margin-top: 0; /* Gap handles spacing */
+}
+
+/* Aggiunto questa regola per #coordinates-section */
+#coordinates-section {
+    display: flex; /* Rendi un contenitore flex */
+    flex-direction: column; /* Impila i suoi figli verticalmente */
+    gap: 10px; /* Mantiene lo spazio tra gli elementi esistenti */
+    /* Aggiungi questo per permettere al flex container di gestire lo spazio */
+    justify-content: flex-start; /* Allinea gli elementi all'inizio */
+    align-items: stretch; /* Fai in modo che gli elementi si estendano in larghezza */
+}
+
+/* Regola per il bottone all'interno di #coordinates-section */
+#coordinates-section button {
+    width: 100%; /* Già presente, ma assicuriamoci che copra l'intera larghezza */
+    /* Questa è la proprietà chiave per spostare il bottone in basso */
+    margin-top: auto;
+}
+
+/* New container to hold address, coordinates and vertices side-by-side below map/details */
+.info-panel-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Spacing between address and coordinates sections */
+    flex: 1 1 100%; /* Take full width below the main row (map/details) */
+}
+
+#coordinates-section p {
+    font-size: 0.9em;
+    color: var(--text-color);
+    word-wrap: break-word;
+}
+
+/* Stili per la nuova sezione vertici */
+#polygon-vertices-section .vertices-list {
+    max-height: 200px; /* Limita l'altezza per lo scroll */
+    overflow-y: auto; /* Abilita lo scroll verticale */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: var(--light-bg);
+    font-size: 0.9em;
+}
+
+#polygon-vertices-section .vertices-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#polygon-vertices-section .vertices-list li {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+}
+
+#polygon-vertices-section .vertices-list li:last-child {
+    border-bottom: none;
+}
+
+
+label {
+    font-weight: 700;
+    margin-top: 5px;
+    display: block;
+    font-size: 0.95em;
+}
+
+input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+button {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--primary-green);
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.05em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--dark-green);
+}
+
+h3 {
+    color: var(--primary-green);
+    font-size: 1.4em;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+h4 {
+    color: var(--dark-green);
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.summary-item {
+    background-color: var(--light-bg);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.summary-item h4 {
+    margin: 0 0 8px 0;
+    color: var(--dark-green);
+    font-size: 1.1em;
+}
+
+.summary-item p {
+    margin: 0;
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Styles for "My Terrains" list (in sidebar) */
+.terreno-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.terreno-input-group input {
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+
+.add-terreno-button {
+    background-color: var(--primary-blue);
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-terreno-button:hover {
+    background-color: var(--dark-blue);
+    transform: scale(1.1);
+}
+
+.terreno-list {
+    list-style: none;
+    padding: 0;
+    margin: -5px 0 15px 0;
+}
+
+.terreno-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--light-bg);
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.terreno-item:hover {
+    background-color: #dce3e9;
+    transform: translateX(3px);
+}
+
+.terreno-item.selected {
+    background-color: var(--primary-green);
+    color: white;
+    font-weight: 700;
+    border: 1px solid var(--dark-green);
+}
+
+.terreno-item.selected .terreno-name {
+    color: white;
+}
+
+.terreno-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.terreno-actions button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 5px;
+    width: auto;
+    transition: color 0.2s ease;
+}
+
+.terreno-item.selected .terreno-actions button {
+    color: white;
+}
+
+.terreno-actions button:hover {
+    color: var(--dark-blue);
+}
+
+
+#terreni-table .actions-cell { /* Questa classe va aggiunta alla cella nel JS */
+    display: flex;
+    gap: 5px; 
+    justify-content: center; /* Per centrare i bottoni orizzontalmente nella cella */
+    align-items: center; /* Per allineare i bottoni verticalmente nella cella */
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+#terreni-table .actions-cell button {
+    width: auto; 
+    padding: 5px 8px; 
+    font-size: 0.9em; /* grandezza */
+}
+
+#terreni-table thead th {
+    /* Stili generali per le intestazioni della tabella */
+    padding: 10px; /* Padding su tutti i lati */
+    padding-bottom: 25px; 
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+
+
+/* Styles for multiple species input (in details section) */
+.species-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.species-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.species-item:last-child {
+    border-bottom: none;
+}
+
+.species-item span {
+    flex-grow: 1;
+}
+
+.species-item button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0 5px;
+    width: auto;
+}
+
+.species-item button:hover {
+    color: var(--dark-blue);
+}
+
+.species-input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.species-input-group input {
+    flex: 1;
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+.species-input-group button {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+/* Specific styles for inputs in details section */
+#selected-terrain-details input[type="text"] {
+    margin-bottom: 0;
+}
+#selected-terrain-details .info-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+#selected-terrain-details .info-group > div {
+    flex: 1 1 45%;
+    min-width: 150px;
+}
+
+/* Nuovo stile per la casella di ricerca indirizzo nella sidebar */
+.address-search-sidebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px; /* Spazio tra la ricerca e i terreni */
+}
+
+.address-search-sidebar input {
+    flex-grow: 1;
+    margin-bottom: 0; /* Rimuove il margine inferiore predefinito */
+}
+
+.address-search-sidebar .search-address-button,
+.address-search-sidebar .clear-pin-button { /* Applica stili simili al nuovo pulsante */
+    background-color: var(--primary-blue);
+    color: white;
+    border-radius: 50%; /* Rendi il pulsante rotondo */
+    width: 40px; /* Larghezza fissa */
+    height: 40px; /* Altezza fissa */
+    min-width: 40px; /* Assicura che non si restringa */
+    min-height: 40px; /* Assicura che non si restringa */
+    padding: 0; /* Rimuovi padding interno */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em; /* Dimensione icona */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.address-search-sidebar .search-address-button:hover,
+.address-search-sidebar .clear-pin-button:hover {
+    background-color: var(--dark-blue);
+    transform: scale(1.1);
+}
+
+.address-search-sidebar .clear-pin-button {
+    background-color: #dc3545; /* Colore rosso per il pulsante di cancellazione */
+}
+
+.address-search-sidebar .clear-pin-button:hover {
+    background-color: #c82333; /* Colore rosso più scuro al hover */
+}
+
+/* Aggiunte per la tabella "Dettagli" */
+#terreni-table {
+    width: 100%; /* Assicura che la tabella occupi tutta la larghezza disponibile */
+    table-layout: fixed; /* Forza le colonne ad avere larghezza fissa */
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#terreni-table th,
+#terreni-table td {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    word-wrap: break-word; /* Permette al testo lungo di andare a capo */
+}
+
+#terreni-table thead tr {
+    background-color: var(--light-bg);
+}
+
+/* Media query per schermi più piccoli */
+@media (max-width: 768px) {
+    #terreni-table {
+        display: block; /* Rende la tabella un blocco per lo scroll orizzontale */
+        overflow-x: auto; /* Abilita lo scroll orizzontale se il contenuto è troppo largo */
+        white-space: nowrap; /* Impedisce alle celle di andare a capo */
+    }
+
+    #terreni-table thead, #terreni-table tbody, #terreni-table th, #terreni-table td, #terreni-table tr {
+        display: block; /* Ogni elemento della tabella diventa un blocco */
+    }
+
+    #terreni-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px; /* Nasconde l'intestazione originale */
+    }
+
+    #terreni-table tr {
+        border: 1px solid var(--border-color);
+        margin-bottom: 10px;
+        border-radius: var(--border-radius);
+        overflow: hidden; /* Nasconde eventuali bordi extra */
+    }
+
+    #terreni-table td {
+        border: none; /* Rimuove i bordi delle celle */
+        border-bottom: 1px solid var(--border-color); /* Aggiunge un bordo inferiore per separare le righe */
+        position: relative;
+        padding-left: 50%; /* Spazio per l'etichetta della colonna */
+        text-align: right; /* Allinea il contenuto a destra */
+    }
+
+    #terreni-table td:before {
+        content: attr(data-label); /* Usa l'attributo data-label per l'etichetta */
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--dark-green);
+    }
+}
+
+
+@media (max-width: 992px) { /* Breakpoint for single column layout on mobile */
+    #container {
+        flex-direction: column;
+    }
+
+    #sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        transform: translateX(0) !important;
+        height: auto;
+    }
+
+    #sidebar.hidden {
+        transform: translateX(-100%) !important;
+        height: 0;
+        overflow: hidden;
+    }
+
+    #main-content-area {
+        padding: 10px;
+        flex-direction: column;
+    }
+
+    #main-map-container,
+    #selected-terrain-details,
+    .dashboard-section,
+    .info-panel-row { /* Apply to the new row container as well */
+        flex: 1 1 100%;
+        min-width: unset;
+        height: auto;
+    }
+
+    #main-map-container {
+        height: 50vh;
+    }
+
+    /* For address and coordinates section on smaller screens, make them stack */
+    #coordinates-section,
+    #polygon-vertices-section { /* Anche la sezione vertici */
+        flex: 1 1 100%;
+    }
+}

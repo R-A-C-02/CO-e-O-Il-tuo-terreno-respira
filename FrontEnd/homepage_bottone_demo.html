@@ -113,35 +113,67 @@
         .navbar .nav-links a:hover::after {
             width: 100%;
         }
+/* Stile per i bottoni "Accedi / Registrati" e "Vai alla Dashboard" */
+.btn-auth-register,
+.btn-dashboard, /* Assicurati che anche .btn-dashboard sia incluso qui */
+.btn-demo {
+    background-color: var(--primary-green);
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    display: inline-flex; /* Usa inline-flex per centrare il testo verticalmente e orizzontalmente */
+    align-items: center; /* Centra verticalmente il contenuto del bottone */
+    justify-content: center; /* Centra orizzontalmente il contenuto del bottone */
+    white-space: nowrap;
+    margin-left: 0.8rem; /* Spazio tra i bottoni e dagli altri link */
+}
 
-        /* Stile per i bottoni "Accedi / Registrati" e "Vai alla Dashboard" */
-        .btn-auth-register,
-        .btn-dashboard,
-        .btn-demo { /* Aggiunto anche il bottone della demo */
-            background-color: var(--primary-green); /* Usa il verde primario */
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-            text-decoration: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            display: inline-block; /* o inline-flex */
-            width: 160px;            /* permette al bottone di adattarsi */
-            justify-content: center;     /* centra orizzontalmente */
-            align-items: center;         /* centra verticalmente */
-            padding: 0.6rem 1.5rem; /* spazio interno attorno al testo */
-            white-space: nowrap;    /* impedisce che il testo vada a capo */
-            margin-left: 0.8rem; /* Spazio tra i bottoni e dagli altri link */
-        }
+.navbar {
+    /* ... altre proprietà ... */
+    display: flex; /* Già presente, ma assicurati che sia flex */
+    justify-content: space-between; /* Sposta gli elementi alle estremità */
+    align-items: center; /* Allinea verticalmente gli elementi al centro */
+    /* ... altre proprietà ... */
+}
 
-        .btn-auth-register:hover,
-        .btn-dashboard:hover,
-        .btn-demo:hover { /* Aggiunto anche il bottone della demo */
-            background-color: var(--accent-green);
-            transform: translateY(-1px);
-        }
+.navbar .nav-links {
+    /* Rimuovi il margin: 0 auto; che centrava il menu e interferiva con il posizionamento dei bottoni a destra */
+    list-style: none;
+    margin: 0; /* Rimuovi margin auto */
+    padding: 0;
+    display: flex;
+    gap: 2rem;
+    flex-grow: 1; /* Permette al menu di occupare lo spazio centrale disponibile */
+    justify-content: center; /* Centra i link di navigazione all'interno dello spazio che occupano */
+}
+
+.navbar .auth-buttons {
+    display: flex; /* Rendi questo contenitore flex per i bottoni */
+    align-items: center; /* Allinea i bottoni verticalmente */
+    gap: 0.8rem; /* Spazio tra i bottoni */
+}
+
+/* Media Queries per la Responsività */
+@media (max-width: 900px) {
+    .navbar .auth-buttons {
+        flex-direction: column; /* Bottoni impilati nel menu mobile */
+        gap: 0.8rem;
+        margin-top: 1rem;
+        align-items: center;
+        width: 100%;
+    }
+    .navbar .auth-buttons .btn-auth-register,
+    .navbar .auth-buttons .btn-dashboard {
+        width: 80%; /* I bottoni sono l'80% della larghezza del menu mobile */
+        text-align: center;
+        margin-left: 0; /* Rimuovi margine a sinistra per mobile */
+    }
+}
 
         /* Hero Section - Titolo più grande, sezione meno espansa */
         .hero-section {
@@ -650,11 +682,11 @@
         <li><a href="#benefici"><i class="fas fa-award"></i> Benefici</a></li>
         <li><a href="#testimonianze"><i class="fas fa-comments"></i> Testimonianze</a></li>
         <li><a href="#contatti"><i class="fas fa-envelope"></i> Contatti</a></li>
-        <li class="desktop-only">
-            <a href="auth.html" class="btn-auth-register">Accedi / Registrati</a>
-            <a href="dashboard.html" class="btn-dashboard">Vai alla Dashboard</a>
-        </li>
     </ul>
+
+    <div class="auth-buttons desktop-only">
+        <a href="auth.html" class="btn-auth-register">Accedi / Registrati</a>
+    </div>
 
     <div class="hamburger" id="hamburger">
         <i class="fas fa-bars"></i>

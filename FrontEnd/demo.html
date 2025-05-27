@@ -23,9 +23,25 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--background-color);
+            background: url('foglie.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: var(--text-color);
             line-height: 1.6;
+        }
+
+        /* Overlay per migliorare la leggibilità del testo sul background, con sfocatura e trasparenza */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Modificato il gradiente per meno bianco e aggiunto un leggero blur */
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.073) 0%, rgba(255, 255, 255, 0.577) 50%, rgba(255, 255, 255, 0.626) 100%);
+            backdrop-filter: blur(2px); /* Aggiunto effetto sfocatura */
+            -webkit-backdrop-filter: blur(2px); /* Per compatibilità Safari */
+            z-index: -1;
         }
 
         header {

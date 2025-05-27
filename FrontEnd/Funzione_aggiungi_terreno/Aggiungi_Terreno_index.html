@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="Aggiungi_Terreno_style.css">
 </head>
 <body>
 
@@ -26,14 +26,24 @@
         <h1 class="site-title">CO₂ e O₂: Il tuo terreno respira</h1>
     </div>
     <div class="user-profile" onclick="location.href='profile.html'">
-        <img src="https://via.placeholder.com/40/28a745/ffffff?text=BB" alt="Bianca Bianchi Profile Picture">
-        <span>Bianca Bianchi</span>
+        <span>Er Villa De Ostia</span>
     </div>
 </header>
 
 <div id="container">
     <div id="sidebar">
         <h3>I miei terreni</h3>
+
+        <div class="address-search-sidebar">
+            <input type="text" id="indirizzo_search_sidebar" placeholder="Cerca Indirizzo:">
+            <button onclick="goToLocationSidebar()" class="search-address-button" title="Cerca Indirizzo">
+                <i class="fas fa-search"></i>
+            </button>
+            <button onclick="clearAddressMarkerAndInput()" class="clear-pin-button" title="Cancella Pin e Indirizzo">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
         <div class="terreno-input-group">
             <input type="text" id="terreno-name-input" placeholder="Nome Terreno" value="Nuovo Terreno">
             <button class="add-terreno-button" onclick="addTerreno()">
@@ -81,14 +91,6 @@
         </div>
 
         <div class="info-panel-row">
-            <div id="address-section" class="dashboard-section">
-                <h3>Indirizzo</h3>
-                <p id="address-display">Nessun indirizzo trovato.</p>
-                <label for="indirizzo_search">Cerca Indirizzo:</label>
-                <input type="text" id="indirizzo_search" placeholder="es. Via Roma, 00100 Roma">
-                <button onclick="goToLocation()">Cerca</button>
-            </div>
-
             <div id="coordinates-section" class="dashboard-section">
                 <h3>Coordinate Centroide Poligono</h3>
                 <p id="centroid-display">Centroide: N/A</p>
@@ -96,8 +98,15 @@
             </div>
         </div>
 
+        <div id="polygon-vertices-section" class="dashboard-section" style="display: none;">
+            <h3>Coordinate Vertici Poligono</h3>
+            <div id="vertices-display" class="vertices-list">
+                Nessun poligono selezionato o disegnato.
+            </div>
+        </div>
+
         <div class="dashboard-section">
-            <h3>Riepilogo Globale Terreni</h3>
+            <h3>Riepilogo Terreno</h3>
             <div class="summary-grid">
                 <div class="summary-item">
                     <h4>CO₂ Assorbita Totale (kg/anno)</h4>
@@ -114,7 +123,7 @@
         </div>
 
         <div class="dashboard-section">
-            <h3>Tutti i Terreni in Dettaglio</h3>
+            <h3>Dettagli</h3>
             <table id="terreni-table" style="width:100%; border-collapse: collapse; margin-top: 15px;">
                 <thead>
                 <tr style="background-color: var(--light-bg);">
@@ -122,8 +131,7 @@
                     <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Specie</th>
                     <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Area (ha)</th>
                     <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">CO₂ Assorbita (kg/anno)</th>
-                    <th style="padding: 10px; border: 1px solid var(--border-color); text-align: left;">Azioni</th>
-                </tr>
+                    </tr>
                 </thead>
                 <tbody>
                 </tbody>
@@ -135,7 +143,7 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.10.0/leaflet.geometryutil.min.js"></script>
-<script src="script.js"></script>
+<script src="Aggiungi_Terreno_script.js"></script>
 
 </body>
 </html>

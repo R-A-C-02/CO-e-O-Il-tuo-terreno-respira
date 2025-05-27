@@ -1,8 +1,37 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, TIMESTAMP, func
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, TIMESTAMP, func
 from sqlalchemy.orm import relationship, declarative_base
 from geoalchemy2 import Geometry
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List
+from pydantic import BaseModel
+from typing import List, Optional
+
+
+class EsportaRequest(BaseModel):
+    # campi di esempio, da adattare alle tue necessità
+    formato: str
+    dati: Optional[List[dict]] = None
+
+class EsportaResponse(BaseModel):
+    esito: str
+    url_file: Optional[str] = None
+
+class PlotBase(BaseModel):
+    id: Optional[int]
+    name: Optional[str]
+    # Aggiungi altri campi se servono, ma evita Geometry complessi (o usa stringhe WKT/GeoJSON)
+
+class PlotSpeciesBase(BaseModel):
+    species_id: int
+    surface_area: float
+    actual_co2_absorption: Optional[float] = None
+    actual_o2_production: Optional[float] = None
+
+# from sqlalchemy import Column, Integer, String, Float, ForeignKey, TIMESTAMP
+# from sqlalchemy.orm import relationship, declarative_base
+# from geoalchemy2 import Geometry
+# from sqlalchemy import func
+
 
 Base = declarative_base()
 
@@ -115,8 +144,12 @@ class WeatherData(Base):
 
 
 class CalcoloRequest(BaseModel):
-    terreno: List[Plot]
-    vegetazione: List[PlotSpecies]
+    terreno: List[PlotBase]
+    vegetazione: List[PlotSpeciesBase]
+
+    class Config:
+        orm_mode = True
+
 
 class CalcoloResponse(BaseModel):
     co2_giornaliera: float
@@ -127,6 +160,7 @@ class InserisciRequest(BaseModel):
     utente : User
     terreno: Plot
     vegetazione: List[PlotSpecies]
+
 
 class InserisciResponse(BaseModel):
     esito : str

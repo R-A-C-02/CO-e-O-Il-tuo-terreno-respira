@@ -4,6 +4,11 @@ from datetime import datetime
 
 
 # ===== USER =====
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserBase(BaseModel):
     email: EmailStr
 

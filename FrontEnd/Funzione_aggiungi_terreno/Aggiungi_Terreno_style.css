@@ -178,22 +178,15 @@ header {
 }
 
 /* Styles for new Address and Coordinates sections */
-#address-section,
-#coordinates-section {
+#coordinates-section,
+#polygon-vertices-section { /* Aggiunto la nuova sezione */
     background-color: var(--white-bg);
     padding: 20px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    flex: 1 1 calc(50% - 7.5px); /* Adjusted to sit side-by-side below the map/details, accounting for gap */
+    flex: 1 1 calc(33% - 10px); /* Adjusted to sit side-by-side below the map/details, accounting for gap */
     min-width: 300px; /* Ensure they don't get too small */
     margin-top: 0; /* Gap handles spacing */
-}
-
-/* Add this new rule to your <style> block */
-#address-section {
-    display: flex; /* Make it a flex container */
-    flex-direction: column; /* Stack its children vertically */
-    gap: 10px; /* Add some space between elements */
 }
 
 /* Aggiunto questa regola per #coordinates-section */
@@ -213,7 +206,7 @@ header {
     margin-top: auto;
 }
 
-/* New container to hold address and coordinates side-by-side below map/details */
+/* New container to hold address, coordinates and vertices side-by-side below map/details */
 .info-panel-row {
     display: flex;
     flex-wrap: wrap;
@@ -221,11 +214,37 @@ header {
     flex: 1 1 100%; /* Take full width below the main row (map/details) */
 }
 
-#address-section p,
 #coordinates-section p {
     font-size: 0.9em;
     color: var(--text-color);
     word-wrap: break-word;
+}
+
+/* Stili per la nuova sezione vertici */
+#polygon-vertices-section .vertices-list {
+    max-height: 200px; /* Limita l'altezza per lo scroll */
+    overflow-y: auto; /* Abilita lo scroll verticale */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: var(--light-bg);
+    font-size: 0.9em;
+}
+
+#polygon-vertices-section .vertices-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#polygon-vertices-section .vertices-list li {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed rgba(0,0,0,0.1);
+}
+
+#polygon-vertices-section .vertices-list li:last-child {
+    border-bottom: none;
 }
 
 
@@ -503,6 +522,118 @@ h4 {
     min-width: 150px;
 }
 
+/* Nuovo stile per la casella di ricerca indirizzo nella sidebar */
+.address-search-sidebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px; /* Spazio tra la ricerca e i terreni */
+}
+
+.address-search-sidebar input {
+    flex-grow: 1;
+    margin-bottom: 0; /* Rimuove il margine inferiore predefinito */
+}
+
+.address-search-sidebar .search-address-button,
+.address-search-sidebar .clear-pin-button { /* Applica stili simili al nuovo pulsante */
+    background-color: var(--primary-blue);
+    color: white;
+    border-radius: 50%; /* Rendi il pulsante rotondo */
+    width: 40px; /* Larghezza fissa */
+    height: 40px; /* Altezza fissa */
+    min-width: 40px; /* Assicura che non si restringa */
+    min-height: 40px; /* Assicura che non si restringa */
+    padding: 0; /* Rimuovi padding interno */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em; /* Dimensione icona */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.address-search-sidebar .search-address-button:hover,
+.address-search-sidebar .clear-pin-button:hover {
+    background-color: var(--dark-blue);
+    transform: scale(1.1);
+}
+
+.address-search-sidebar .clear-pin-button {
+    background-color: #dc3545; /* Colore rosso per il pulsante di cancellazione */
+}
+
+.address-search-sidebar .clear-pin-button:hover {
+    background-color: #c82333; /* Colore rosso più scuro al hover */
+}
+
+/* Aggiunte per la tabella "Dettagli" */
+#terreni-table {
+    width: 100%; /* Assicura che la tabella occupi tutta la larghezza disponibile */
+    table-layout: fixed; /* Forza le colonne ad avere larghezza fissa */
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#terreni-table th,
+#terreni-table td {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+    word-wrap: break-word; /* Permette al testo lungo di andare a capo */
+}
+
+#terreni-table thead tr {
+    background-color: var(--light-bg);
+}
+
+/* Media query per schermi più piccoli */
+@media (max-width: 768px) {
+    #terreni-table {
+        display: block; /* Rende la tabella un blocco per lo scroll orizzontale */
+        overflow-x: auto; /* Abilita lo scroll orizzontale se il contenuto è troppo largo */
+        white-space: nowrap; /* Impedisce alle celle di andare a capo */
+    }
+
+    #terreni-table thead, #terreni-table tbody, #terreni-table th, #terreni-table td, #terreni-table tr {
+        display: block; /* Ogni elemento della tabella diventa un blocco */
+    }
+
+    #terreni-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px; /* Nasconde l'intestazione originale */
+    }
+
+    #terreni-table tr {
+        border: 1px solid var(--border-color);
+        margin-bottom: 10px;
+        border-radius: var(--border-radius);
+        overflow: hidden; /* Nasconde eventuali bordi extra */
+    }
+
+    #terreni-table td {
+        border: none; /* Rimuove i bordi delle celle */
+        border-bottom: 1px solid var(--border-color); /* Aggiunge un bordo inferiore per separare le righe */
+        position: relative;
+        padding-left: 50%; /* Spazio per l'etichetta della colonna */
+        text-align: right; /* Allinea il contenuto a destra */
+    }
+
+    #terreni-table td:before {
+        content: attr(data-label); /* Usa l'attributo data-label per l'etichetta */
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--dark-green);
+    }
+}
+
+
 @media (max-width: 992px) { /* Breakpoint for single column layout on mobile */
     #container {
         flex-direction: column;
@@ -541,8 +672,8 @@ h4 {
     }
 
     /* For address and coordinates section on smaller screens, make them stack */
-    #address-section,
-    #coordinates-section {
+    #coordinates-section,
+    #polygon-vertices-section { /* Anche la sezione vertici */
         flex: 1 1 100%;
     }
 }

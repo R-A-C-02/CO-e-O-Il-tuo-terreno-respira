@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from BackEnd.app.auth import create_access_token, decode_access_token
-from BackEnd.app.schemas import UserCreate, UserLogin
+from BackEnd.app.schemas import UserCreate, UserLogin, UserInsert
 from BackEnd.app.models import User
 from BackEnd.app.security import hash_password, verify_password
 from BackEnd.app.database import SessionLocal
@@ -54,6 +54,21 @@ async def login(request: Request, user: UserLogin, db: AsyncSession = Depends(ge
             "request": request,
             "user_id": db_user.id,
             "email": db_user.email,
+            "token": token
+        }
+    )
+
+@router.post("/inserisciterreno", response_class=HTMLResponse)
+async def login(request: Request, user: UserInsert):
+    
+    token = create_access_token({"id": user.id, "mail": user.email})
+
+    return templates.TemplateResponse(
+        "AggiornamentiDash/DashBoardFinale/Aggiungi_Terreno_index.html",
+        {
+            "request": request,
+            "user_id": user.id,
+            "email": user.email,
             "token": token
         }
     )

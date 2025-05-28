@@ -9,6 +9,10 @@ class UserLogin(BaseModel):
     email : str
     password : str
 
+class UserInsert(BaseModel):
+    id : int
+    email : str
+
 class UserBase(BaseModel):
     email: EmailStr
 
@@ -170,7 +174,7 @@ class CalcoloResponse(BaseModel):
     dettaglio_per_specie: List[dict]  # Esempio: {"nome": "quercia", "co2": 12.4, "o2": 8.1} (vogliamo farlo così?)
 
 class SaveCoordinatesRequest(BaseModel):
-    id: int
+    idutente: int
     terrainName: str
     species: list[SpeciesSave]
     centroid: Centroid

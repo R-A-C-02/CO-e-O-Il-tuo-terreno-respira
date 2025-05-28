@@ -14,7 +14,7 @@ const hidePasswordSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="18" heig
  */
 async function loadLocationData() {
     try {
-        const response = await fetch('Province_Comuni.json'); 
+        const response = await fetch('static/province_comuni.json'); 
         if (!response.ok) {
             throw new Error(`Errore HTTP: ${response.status} ${response.statusText}`);
         }

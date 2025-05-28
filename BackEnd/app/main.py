@@ -1,25 +1,36 @@
 from fastapi import FastAPI
-from app.database import engine
-from app.models import Base, User
-from app.routes import router
-from app.security import hash_password, verify_password
-from app.models import CalcoloRequest, CalcoloResponse, SaveCoordinatesRequest, SaveCoordinatesResponse, ClassificaRequest, ClassificaResponse, EsportaRequest, EsportaResponse, MeteoResponse, MeteoRequest
-from app.utils import calcola_impatti,inserisci_terreno,mostra_classifica,Esporta
-from app.routes import router as weather_router
+from BackEnd.app.database import engine
+from BackEnd.app.models import Base, User
+from BackEnd.app.routes import router
+from BackEnd.app.security import hash_password, verify_password
+from BackEnd.app.schemas import CalcoloRequest, CalcoloResponse, SaveCoordinatesRequest, SaveCoordinatesResponse, ClassificaRequest, ClassificaResponse, EsportaRequest, EsportaResponse
+from BackEnd.app.utils import calcola_impatti,inserisci_terreno,mostra_classifica,Esporta
+
+from fastapi import Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+import os
 
 app = FastAPI()
 
+# Imposta FrontEnd come directory dei template
+templates = Jinja2Templates(directory="FrontEnd")
+app = FastAPI()
+
 app.include_router(router)
-app.include_router(weather_router)
 
 @app.on_event("startup")
 async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-@app.get("/")
-async def root():
-    return {"message": "CO₂ e O₂ - Web App API online!"}
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("homepage_bottone_demo.html", {"request": request})
+
+@app.get("/login", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("login_main.html", {"request": request})
 
 @app.get("/calcola", response_model=CalcoloResponse)
 async def calcola_impatti_ambientali(payload: CalcoloRequest):
@@ -38,9 +49,9 @@ async def mostra_classifica(payload: ClassificaRequest):
 async def Esporta(payload: EsportaRequest):
     return await Esporta(payload)
 
-@app.get("/getmeteo", response_model=MeteoResponse)
-async def Esporta(payload: MeteoRequest):
-    return await Esporta(payload)
+#@app.get("/getmeteo", response_model=MeteoResponse)
+#async def Esporta(payload: MeteoRequest):
+#    return await Esporta(payload)
 
 
 #pip install uvicorn

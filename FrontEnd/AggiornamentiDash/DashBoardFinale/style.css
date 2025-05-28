@@ -340,3 +340,28 @@ body.dark-theme #plantFilterForm {
   border-color: #444;
   color: #e0e0e0;
 }
+.sidebar #exportLinePDF {
+  margin-top: 20px;
+}
+.sidebar .export-link {
+  display: block;
+  color: white;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.sidebar .export-link:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.sidebar.collapsed .export-link {
+  text-align: center;
+  padding: 10px 5px;
+}
+
+.sidebar.collapsed .export-link span {
+  display: none;
+}

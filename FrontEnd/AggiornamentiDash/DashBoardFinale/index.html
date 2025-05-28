@@ -31,9 +31,13 @@
     <nav>
       <a href="#" aria-label="Home">🏠 <span>Home</span></a>
       <a href="#" aria-label="Aggiungi Terreno">🌱 <span>Aggiungi Terreno</span></a>
+      <a href="#" id="exportLinePDF" class="export-link" aria-label="Esporta PDF">📄 <span>Esporta PDF</span></a>
       <a href="#" aria-label="Impostazioni">⚙️ <span>Impostazioni</span></a>
       <a href="#" aria-label="Aiuto">❓ <span>Aiuto</span></a>
+      
+
     </nav>
+    
   </aside>
 
   <main class="main-content" id="mainContent">
@@ -160,7 +164,7 @@ document.getElementById('filterBarChart')?.addEventListener('click', () => {
     </table>
   </div>
 
-  <canvas id="barChart" aria-label="Grafico Dati Meteo" role="img" style="height: 300px;"></canvas>
+  <canvas id="barChart" class="chart-canvas" width="800" height="400" style="max-width: 100%;" aria-label="Grafico Dati Meteo" role="img"></canvas>
 </article>
 
       <article class="income" aria-labelledby="gas-title">
@@ -186,10 +190,10 @@ document.getElementById('filterBarChart')?.addEventListener('click', () => {
           </select>
           <button id="filterChart" class="btn btn-sm btn-outline-primary">Filtra</button>
         </div>
-        <canvas id="lineChart" aria-label="Grafico CO2 e O2" role="img"></canvas>
+        <canvas id="lineChart" class="chart-canvas" width="800" height="400" style="max-width: 100%;" aria-label="Grafico CO₂ e O₂" role="img"></canvas>
         <p id="co2Display">CO₂: -- kg</p>
         <p id="o2Display">O₂: -- kg</p>
-        <button id="exportLinePDF" class="btn btn-sm btn-outline-success mt-2">📄 Esporta PDF</button>
+        
       </article>
 
       <article class="tickets" aria-labelledby="plants-title">
@@ -201,7 +205,7 @@ document.getElementById('filterBarChart')?.addEventListener('click', () => {
         </form>
 
 
-        <canvas id="pieChart" aria-label="Distribuzione Specie Piante" role="img"></canvas>
+        <canvas id="pieChart" class="chart-canvas" width="800" height="400" style="max-width: 100%;" aria-label="Distribuzione Specie Piante" role="img"></canvas>
         <p>Totale Specie: 333</p>
         <p>Distribuzione per categoria</p>
       </article>
@@ -225,39 +229,98 @@ document.getElementById('filterBarChart')?.addEventListener('click', () => {
       <button class="chat-send" aria-label="Invia messaggio">➤</button>
     </footer>
   </section>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     const exportBtn = document.getElementById('exportLinePDF');
-    exportBtn?.addEventListener('click', () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+    
 
-      const labels = window.lineChart?.data?.labels || [];
-      const co2 = window.lineChart?.data?.datasets?.[0]?.data || [];
-      const o2 = window.lineChart?.data?.datasets?.[1]?.data || [];
+exportBtn?.addEventListener('click', async () => {
+  const jsPDF = window.jspdf.jsPDF;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pdfWidth = doc.internal.pageSize.getWidth() - 20;
+  doc.setFont("helvetica", "normal");
 
-      doc.setFontSize(14);
-      doc.text('Dati CO₂ e O₂', 10, 10);
+  // === Pagina 1: Dati Meteo + Grafico a LINEE ===
+  let yOffset = 10;
+  doc.setFontSize(18);
+  doc.text('1. Dati Meteo Settimanali', 10, yOffset);
+  yOffset += 10;
 
-      let y = 20;
-      doc.setFontSize(10);
-      doc.text('Ora     |  CO₂ (kg)  |  O₂ (kg)', 10, y);
-      y += 6;
+  const lineChart = document.querySelectorAll('.chart-canvas')[0];
+  if (lineChart) {
+    const image = await html2canvas(lineChart, { scale: 2, useCORS: true });
+    const imgData = image.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, yOffset, pdfWidth, 100);
+  }
 
-      labels.forEach((label, i) => {
-        const row = `${label.padEnd(7)}|   ${co2[i]?.toString().padEnd(8)}|   ${o2[i]}`;
-        doc.text(row, 10, y);
-        y += 6;
-        if (y > 280) {
-          doc.addPage();
-          y = 20;
-        }
-      });
+  // === Pagina 2: Dati CO2/O2 + Grafico a BARRE ===
+  doc.addPage();
+  let coY = 10;
+  doc.setFontSize(18);
+  doc.text('2. Dati Finali CO₂ e O₂', 10, coY);
+  coY += 10;
 
-      doc.save('co2_o2_dati.pdf');
-    });
+  const co2Text = document.getElementById('co2Display')?.textContent || 'CO₂: -- kg';
+  const o2Text = document.getElementById('o2Display')?.textContent || 'O₂: -- kg';
+  doc.setFontSize(12);
+  doc.text(`Assorbimento CO₂ finale: ${co2Text.replace('CO₂: ', '')}`, 10, coY);
+  coY += 6;
+  doc.text(`Emissione O₂ finale: ${o2Text.replace('O₂: ', '')}`, 10, coY);
+
+  const barChart = document.querySelectorAll('.chart-canvas')[1];
+  if (barChart) {
+    const image = await html2canvas(barChart, { scale: 2, useCORS: true });
+    const imgData = image.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, 30, pdfWidth, 100);
+  }
+
+  // === Pagina 3: Dati Piante + Grafico Torta ===
+  doc.addPage();
+  let pieY = 10;
+  doc.setFontSize(18);
+  doc.text('3. Specie Selezionate', 10, pieY);
+  pieY += 10;
+
+  const pieLabels = Array.from(document.querySelectorAll('#plantFilterForm input[type="checkbox"]:checked'))
+    .map(cb => cb.value);
+  const pieChart = Chart.getChart("pieChart");
+  const pieData = pieChart?.data || { labels: [], datasets: [{ data: [] }] };
+
+  const selectedSpecies = pieLabels.map(label => {
+    const index = pieData.labels.indexOf(label);
+    const value = index !== -1 ? pieData.datasets[0].data[index] : '--';
+    return `${label}: ${value}`;
+  });
+
+  doc.setFontSize(12);
+  doc.text(`Numero totale di specie selezionate: ${selectedSpecies.length}`, 10, pieY);
+  pieY += 6;
+
+  const speciesText = doc.splitTextToSize(selectedSpecies.join(', '), 180);
+  doc.setFontSize(10);
+  doc.text(speciesText, 10, pieY);
+  pieY += speciesText.length * 5 + 5;
+
+  const pieCanvas = document.querySelectorAll('.chart-canvas')[2];
+  if (pieCanvas) {
+    const image = await html2canvas(pieCanvas, { scale: 2, useCORS: true });
+    const imgData = image.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, pieY, pdfWidth, 100);
+  }
+
+  doc.save('report_CO2_O2.pdf');
+});
+
+
   });
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 </body>
 </html>
+

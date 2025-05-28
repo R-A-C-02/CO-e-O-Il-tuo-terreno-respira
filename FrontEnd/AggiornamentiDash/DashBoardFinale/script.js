@@ -37,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const pieColors = pieLabels.map((_, i) =>
   `hsl(${i * 9 % 360}, 70%, 60%)`
   );
-  const lineChart = new Chart(ctxLine, {
+  window.lineChart = new Chart(ctxLine, {
   type: 'line',
   data: {
     labels: [...initialLabels],
@@ -222,7 +222,33 @@ window.addEventListener('DOMContentLoaded', () => {
   searchInput.type = 'text';
   searchInput.placeholder = 'Cerca piante...';
   searchInput.className = 'form-control form-control-sm mb-2';
-  plantFilterForm.prepend(searchInput);
+  
+  const controls = document.createElement('div');
+  controls.classList.add('d-flex', 'gap-2', 'mb-2');
+
+  const selectAllBtn = document.createElement('button');
+  selectAllBtn.textContent = 'Seleziona Tutti';
+  selectAllBtn.className = 'btn btn-sm btn-outline-success';
+  selectAllBtn.type = 'button';
+  selectAllBtn.addEventListener('click', () => {
+    plantFilterForm.querySelectorAll('input[name="plantFilter"]').forEach(cb => cb.checked = true);
+    updatePieChart();
+  });
+
+  const deselectAllBtn = document.createElement('button');
+  deselectAllBtn.textContent = 'Deseleziona Tutti';
+  deselectAllBtn.className = 'btn btn-sm btn-outline-danger';
+  deselectAllBtn.type = 'button';
+  deselectAllBtn.addEventListener('click', () => {
+    plantFilterForm.querySelectorAll('input[name="plantFilter"]').forEach(cb => cb.checked = false);
+    updatePieChart();
+  });
+
+  controls.appendChild(selectAllBtn);
+  controls.appendChild(deselectAllBtn);
+  plantFilterForm.prepend(controls);
+
+plantFilterForm.prepend(searchInput);
 
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase();
@@ -232,41 +258,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const controls = document.createElement('div');
-  controls.classList.add('d-flex', 'gap-2', 'mt-2');
-
-  const selectAllBtn = document.createElement('button');
-  selectAllBtn.textContent = 'Seleziona Tutti';
-  selectAllBtn.className = 'btn btn-sm btn-outline-success';
-  selectAllBtn.type = 'button';
-  selectAllBtn.addEventListener('click', () => {
-    plantFilterForm.querySelectorAll('input[name="plantFilter"]').forEach(cb => cb.checked = true)
-
-    updatePieChart();
-  });
-
-  const deselectAllBtn = document.createElement('button');
-  deselectAllBtn.textContent = 'Deseleziona Tutti';
-  deselectAllBtn.className = 'btn btn-sm btn-outline-danger';
-  deselectAllBtn.type = 'button';
-  deselectAllBtn.addEventListener('click', () => {
-    (plantFilterForm.querySelectorAll('input[name="plantFilter"]').forEach(cb => cb.checked = false));
-
-    updatePieChart();
-  });
-    const sidebar = document.getElementById('sidebar');
-  const mainContent = document.getElementById('mainContent');
-  const toggleSidebarBtn = document.getElementById('toggleSidebar');
-
-  toggleSidebarBtn?.addEventListener('click', () => {
-    const isCollapsed = sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('collapsed', isCollapsed);
-    toggleSidebarBtn.textContent = isCollapsed ? '➡️' : '☰';
-  });
-
-  controls.appendChild(selectAllBtn);
-  controls.appendChild(deselectAllBtn);
-  plantFilterForm.appendChild(controls);
+  
 
   const themeToggle = document.getElementById('themeToggle');
   const body = document.body;
@@ -293,25 +285,7 @@ window.addEventListener('DOMContentLoaded', () => {
     chatBox.style.display = isVisible ? 'none' : 'flex';
   });
 
-  const exportBtn = document.getElementById('exportLineCSV');
-  exportBtn?.addEventListener('click', () => {
-    const labels = lineChart.data.labels;
-    const co2 = lineChart.data.datasets[0].data;
-    const o2 = lineChart.data.datasets[1].data;
 
-    let csv = 'Ora,CO2 (kg),O2 (kg)\n';
-    labels.forEach((label, i) => {
-      csv += `${label},${co2[i]},${o2[i]}\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'co2_o2_dati.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
     const updateBarChartWithTerrain = (dataset) => {
     const rainData = dataset.map(d => parseFloat(d[0]));       // Precipitazione: FLOAT
     const temperatureData = dataset.map(d => parseFloat(d[1])); // Temperatura: FLOAT
@@ -335,4 +309,24 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     });
 
+
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('mainContent');
+  const toggleSidebarBtn = document.getElementById('toggleSidebar');
+
+  toggleSidebarBtn?.addEventListener('click', () => {
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('collapsed', isCollapsed);
+    toggleSidebarBtn.textContent = isCollapsed ? '➡️' : '☰';
+  });
+
 });
+
+
+// Funzione per supportare esportazione grafici ad alta risoluzione (opzionale)
+window.captureChartCanvas = async (canvasElement) => {
+  return await html2canvas(canvasElement, {
+    scale: 2,
+    useCORS: true
+  });
+};

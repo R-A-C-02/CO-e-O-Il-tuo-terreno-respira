@@ -23,9 +23,25 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--background-color);
+            background: url('foglie.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: var(--text-color);
             line-height: 1.6;
+        }
+
+        /* Overlay per migliorare la leggibilità del testo sul background, con sfocatura e trasparenza */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Modificato il gradiente per meno bianco e aggiunto un leggero blur */
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.073) 0%, rgba(255, 255, 255, 0.577) 50%, rgba(255, 255, 255, 0.626) 100%);
+            backdrop-filter: blur(2px); /* Aggiunto effetto sfocatura */
+            -webkit-backdrop-filter: blur(2px); /* Per compatibilità Safari */
+            z-index: -1;
         }
 
         header {
@@ -212,6 +228,30 @@
             transform: none;
         }
 
+        .bottone-container {
+            display: flex;
+            justify-content: center; /* centra orizzontalmente */
+            margin-top: auto;
+            margin-bottom: 40px; /* distanza dal fondo */
+        }
+
+        .btn-home {
+            background-color: rgb(43, 96, 187);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 180px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background-color: rgb(118, 196, 241);
+            transform: translateY(-2px);
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -281,7 +321,7 @@
                     <div class="species-input-group">
                         <label for="plantSpecies1">Specie Vegetale:</label>
                         <input type="text" id="plantSpecies1" class="plant-species-input" placeholder="Es: Quercia" required>
-                        <label for="plantQuantity1">Unità:</label>
+                        <label for="plantQuantity1">Quantità:</label>
                         <input type="number" id="plantQuantity1" class="plant-quantity-input" min="1" value="1" required>
                     </div>
                 </div>
@@ -306,6 +346,9 @@
                 </div>
             </div>
         </section>
+        <div class="bottone-container">
+        <button class="btn-home" onclick="window.location.href='homepage_bottone_demo.html'">Torna alla Home</button>
+        </div>
     </main>
 
     <footer>
@@ -454,7 +497,7 @@
                     <div class="species-input-group">
                         <label for="plantSpecies1">Specie Vegetale:</label>
                         <input type="text" id="plantSpecies1" class="plant-species-input" placeholder="Es: Quercia" required>
-                        <label for="plantQuantity1">Unità:</label>
+                        <label for="plantQuantity1">Quantità:</label>
                         <input type="number" id="plantQuantity1" class="plant-quantity-input" min="1" value="1" required>
                     </div>
                 `;
@@ -483,7 +526,7 @@
                 newSpeciesGroup.innerHTML = `
                     <label for="plantSpecies${speciesCount}">Specie Vegetale:</label>
                     <input type="text" id="plantSpecies${speciesCount}" class="plant-species-input" placeholder="Es: Olivo" required>
-                    <label for="plantQuantity${speciesCount}">Unità:</label>
+                    <label for="plantQuantity${speciesCount}">Quantità:</label>
                     <input type="number" id="plantQuantity${speciesCount}" class="plant-quantity-input" min="1" value="1" required>
                 `;
                 speciesInputsDiv.appendChild(newSpeciesGroup);

@@ -5,13 +5,14 @@ from BackEnd.app.routes import router
 from BackEnd.app.security import hash_password, verify_password
 from BackEnd.app.schemas import CalcoloRequest, CalcoloResponse, SaveCoordinatesRequest, SaveCoordinatesResponse, ClassificaRequest, ClassificaResponse, EsportaRequest, EsportaResponse
 from BackEnd.app.utils import calcola_impatti,inserisci_terreno,mostra_classifica,Esporta
-
+from fastapi.staticfiles import StaticFiles
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="FrontEnd"), name="static")
 
 # Imposta FrontEnd come directory dei template
 templates = Jinja2Templates(directory="FrontEnd")
@@ -27,10 +28,6 @@ async def startup():
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("homepage_bottone_demo.html", {"request": request})
-
-@app.get("/login", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse("login_main.html", {"request": request})
 
 @app.get("/calcola", response_model=CalcoloResponse)
 async def calcola_impatti_ambientali(payload: CalcoloRequest):

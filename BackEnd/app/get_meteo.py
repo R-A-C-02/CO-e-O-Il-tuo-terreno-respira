@@ -84,11 +84,13 @@ def fetch_weather_week(plot_id, lat, lon):
     for i in range(len(daily["time"])):
         data.append({
             "date": daily["time"][i],
-            "temperature": daily["temperature_2m"][i],
-            "humidity": daily["relative_humidity_2m"][i],
-            "precipitation": daily["precipitation"][i],
-            "radiation": daily["shortwave_radiation"][i]
+            "temperature": daily["temperature_2m_mean"][i],
+            "humidity": daily["relative_humidity_2m_mean"][i],
+            "precipitation": daily["precipitation_sum"][i],
+            "radiation": daily["shortwave_radiation_sum"][i]
         })
 
     print("✅ Dati meteo settimanali ottenuti.")
     return data
+
+print(fetch_weather_week(plot_id, latitude, longitude))

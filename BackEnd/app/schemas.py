@@ -6,7 +6,6 @@ from typing import List
 # ===== USER =====
 
 class UserLogin(BaseModel):
-    id : int
     email : str
     password : str
 
@@ -14,7 +13,8 @@ class UserBase(BaseModel):
     email: EmailStr
 
 class UserCreate(UserBase):
-    password: str
+    email : str
+    password : str
 
 class UserOut(UserBase):
     id: int
@@ -160,7 +160,6 @@ class Vertice(BaseModel):
 class CalcoloRequest(BaseModel):
     terreno: List[PlotBase]
     vegetazione: List[PlotSpeciesBase]
-
     class Config:
         orm_mode = True
 

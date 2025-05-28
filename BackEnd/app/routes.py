@@ -7,6 +7,7 @@ from app.schemas import UserCreate, UserLogin
 from app.models import User
 from app.security import hash_password, verify_password
 from app.database import SessionLocal
+from app.get_meteo import fetch_and_save_weather
 
 ###############
 
@@ -49,3 +50,10 @@ async def protected_route(
     if not payload:
         raise HTTPException(status_code=401, detail="Token non valido")
     return {"message": f"Benvenuto {payload['sub']}!"}
+
+@router.post("/weather/{plot_id}")
+async def fetch_weather(plot_id: str):
+    success = fetch_and_save_weather(plot_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Plot {plot_id} non trovato o errore nella richiesta meteo.")
+    return {"detail": "Dati meteo salvati con successo."}

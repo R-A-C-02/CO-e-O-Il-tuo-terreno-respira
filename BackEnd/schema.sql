@@ -53,9 +53,9 @@ CREATE TABLE plots (
     name VARCHAR(100),
     geom GEOMETRY(POLYGON, 4326),           -- Polygon
     centroid GEOMETRY(POINT, 4326),         -- Centroid point
-    created_at TIMESTAMP DEFAULT NOW(),
-    total_co2_absorption FLOAT DEFAULT 0,
-    total_o2_production FLOAT DEFAULT 0
+    created_at TIMESTAMP DEFAULT NOW()
+    --total_co2_absorption FLOAT DEFAULT 0,
+    --total_o2_production FLOAT DEFAULT 0
 );
 
 -- Plant Species

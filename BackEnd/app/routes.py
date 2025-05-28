@@ -7,7 +7,7 @@ from BackEnd.app.schemas import UserCreate, UserLogin, UserInsert
 from BackEnd.app.models import User
 from BackEnd.app.security import hash_password, verify_password
 from BackEnd.app.database import SessionLocal
-from BackEnd.app.get_meteo import fetch_and_save_weather_daily,fetch_and_save_weather_weekly
+from BackEnd.app.get_meteo import fetch_and_save_weather_day, fetch_weather_week
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi import Request
@@ -76,7 +76,7 @@ async def login(request: Request, user: UserInsert):
 
 @router.post("/weather/{plot_id}")
 async def fetch_weather(plot_id: str):
-    success = fetch_and_save_weather_daily(plot_id)
+    success = fetch_and_save_weather_day(plot_id)
     if not success:
         raise HTTPException(status_code=404, detail=f"Plot {plot_id} non trovato o errore nella richiesta meteo.")
     return {"detail": "Dati meteo salvati con successo."}

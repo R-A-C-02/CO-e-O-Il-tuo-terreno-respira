@@ -8,7 +8,7 @@ from app.models import Plot, WeatherData
 
 PLOT_ID = "" # VA PRESO TRAMITE UNA CHIAMATA AL FRONTEND
 
-def fetch_and_save_weather(PLOT_ID):
+def fetch_and_save_weather_daily(PLOT_ID):
 
     # DB CONNECTION
     load_dotenv()
@@ -58,7 +58,7 @@ def fetch_and_save_weather(PLOT_ID):
         
         weather = WeatherData(
             plot_id = PLOT_ID,
-            date = timestamp.date(),
+            date_time = timestamp.date(),
             temperature = hourly["temperature_2m"][i],
             humidity = hourly["relative_humidity_2m"][i],
             precipitation = hourly["precipitation"][i],
@@ -69,4 +69,60 @@ def fetch_and_save_weather(PLOT_ID):
     session.commit()
     session.close()
     print("✅ Dati meteo salvati nel database.")
+    return True
+
+def fetch_and_save_weather_weekly(PLOT_ID):
+
+    # DB CONNECTION
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+    engine = create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # Recupera solo il plot con quell'ID
+    plot = session.query(
+        Plot.id,
+        func.ST_Y(Plot.centroid).label("latitude"),
+        func.ST_X(Plot.centroid).label("longitude")
+    ).filter(Plot.id == PLOT_ID).first()
+
+    if not plot:
+        print(f"❌ Nessun plot trovato con ID {PLOT_ID}.")
+        session.close()
+        return False
+
+    latitude = plot.latitude
+    longitude = plot.longitude
+
+    params = {
+    "latitude": latitude,
+    "longitude": longitude,
+    "daily": "temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,shortwave_radiation_sum",
+    }
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    response = requests.get(url, params=params)
+
+    if response.status_code != 200:
+        print(f"❌ Errore nella richiesta meteo: {response.status_code}")
+        session.close()
+        return False
+
+    content = response.json()
+
+    hourly = content["hourly"]
+
+    data = []
+
+    for i in range(len(hourly["time"])):
+        data.append({
+            "date": hourly["time"][i],
+            "temperature": hourly["temperature_2m"][i],
+            "humidity": hourly["relative_humidity_2m"][i],
+            "precipitation": hourly["precipitation"][i],
+            "radiation": hourly["shortwave_radiation"][i]
+        })
+
     return True

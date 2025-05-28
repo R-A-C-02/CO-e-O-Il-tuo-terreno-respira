@@ -5,11 +5,12 @@ from app.routes import router
 from app.security import hash_password, verify_password
 from app.models import CalcoloRequest, CalcoloResponse, InserisciRequest, InserisciResponse, ClassificaRequest, ClassificaResponse, EsportaRequest, EsportaResponse
 from app.utils import calcola_impatti,inserisci_terreno,mostra_classifica,Esporta
+from app.routes import router as weather_router
 
 app = FastAPI()
 
 app.include_router(router)
-
+app.include_router(weather_router)
 
 @app.on_event("startup")
 async def startup():

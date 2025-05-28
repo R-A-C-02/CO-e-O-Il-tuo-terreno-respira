@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from BackEnd.app.models import Plot, WeatherData
+from app.models import Plot, WeatherData
 
 PLOT_ID = "" # VA PRESO TRAMITE UNA CHIAMATA AL FRONTEND
 

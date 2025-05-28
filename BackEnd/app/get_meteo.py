@@ -4,48 +4,39 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from BackEnd.app.models import Plot, WeatherData
+from models import Plot, WeatherData
+from parte_finale_connect_db import recupero_coords_geocentroide
 
-PLOT_ID = "" # VA PRESO TRAMITE UNA CHIAMATA AL FRONTEND
+#PLOT_ID = 1 # VA PRESO TRAMITE UNA CHIAMATA AL FRONTEND
 
-def fetch_and_save_weather_daily(PLOT_ID):
-
+def get_session():
     # DB CONNECTION
     load_dotenv()
     DATABASE_URL = os.getenv("DATABASE_URL")
-
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
-    session = Session()
+    return Session()
 
-    # Recupera solo il plot con quell'ID
-    plot = session.query(
-        Plot.id,
-        func.ST_Y(Plot.centroid).label("latitude"),
-        func.ST_X(Plot.centroid).label("longitude")
-    ).filter(Plot.id == PLOT_ID).first()
+coords = recupero_coords_geocentroide().values()
+#{1: {'plot_id': 1, 'latitudine': 41.8902, 'longitudine': 12.4924}}
+coords_list = list(coords)
+plot_id = coords_list[0]["plot_id"]
+latitude = coords_list[0]["latitudine"]
+longitude = coords_list[0]["longitudine"]
 
-    if not plot:
-        print(f"❌ Nessun plot trovato con ID {PLOT_ID}.")
-        session.close()
-        return False
-
-    latitude = plot.latitude
-    longitude = plot.longitude
-
+def fetch_and_save_weather_day(session, plot_id, lat, lon):
+    url = "https://api.open-meteo.com/v1/forecast"
     params = {
-        "latitude": latitude,
-        "longitude": longitude,
+        "latitude": lat,
+        "longitude": lon,
         "hourly": "temperature_2m,relative_humidity_2m,precipitation,shortwave_radiation",
         "forecast_days": "1"
     }
-    url = "https://api.open-meteo.com/v1/forecast"
 
     response = requests.get(url, params=params)
 
     if response.status_code != 200:
         print(f"❌ Errore nella richiesta meteo: {response.status_code}")
-        session.close()
         return False
 
     content = response.json()
@@ -57,8 +48,8 @@ def fetch_and_save_weather_daily(PLOT_ID):
         timestamp = datetime.fromisoformat(hourly["time"][i])
         
         weather = WeatherData(
-            plot_id = PLOT_ID,
-            date_time = timestamp.date(),
+            plot_id = plot_id,
+            date_time = timestamp,
             temperature = hourly["temperature_2m"][i],
             humidity = hourly["relative_humidity_2m"][i],
             precipitation = hourly["precipitation"][i],
@@ -67,62 +58,37 @@ def fetch_and_save_weather_daily(PLOT_ID):
         session.add(weather)
 
     session.commit()
-    session.close()
     print("✅ Dati meteo salvati nel database.")
     return True
 
-def fetch_and_save_weather_weekly(PLOT_ID):
-
-    # DB CONNECTION
-    load_dotenv()
-    DATABASE_URL = os.getenv("DATABASE_URL")
-
-    engine = create_engine(DATABASE_URL)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    # Recupera solo il plot con quell'ID
-    plot = session.query(
-        Plot.id,
-        func.ST_Y(Plot.centroid).label("latitude"),
-        func.ST_X(Plot.centroid).label("longitude")
-    ).filter(Plot.id == PLOT_ID).first()
-
-    if not plot:
-        print(f"❌ Nessun plot trovato con ID {PLOT_ID}.")
-        session.close()
-        return False
-
-    latitude = plot.latitude
-    longitude = plot.longitude
-
+def fetch_weather_week(plot_id, lat, lon):
+    url = "https://api.open-meteo.com/v1/forecast"
     params = {
-    "latitude": latitude,
-    "longitude": longitude,
+    "latitude": lat,
+    "longitude": lon,
     "daily": "temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum,shortwave_radiation_sum",
     }
-    url = "https://api.open-meteo.com/v1/forecast"
 
     response = requests.get(url, params=params)
 
     if response.status_code != 200:
         print(f"❌ Errore nella richiesta meteo: {response.status_code}")
-        session.close()
         return False
 
     content = response.json()
 
-    hourly = content["hourly"]
+    daily = content["daily"]
 
     data = []
 
-    for i in range(len(hourly["time"])):
+    for i in range(len(daily["time"])):
         data.append({
-            "date": hourly["time"][i],
-            "temperature": hourly["temperature_2m"][i],
-            "humidity": hourly["relative_humidity_2m"][i],
-            "precipitation": hourly["precipitation"][i],
-            "radiation": hourly["shortwave_radiation"][i]
+            "date": daily["time"][i],
+            "temperature": daily["temperature_2m"][i],
+            "humidity": daily["relative_humidity_2m"][i],
+            "precipitation": daily["precipitation"][i],
+            "radiation": daily["shortwave_radiation"][i]
         })
 
-    return True
+    print("✅ Dati meteo settimanali ottenuti.")
+    return data

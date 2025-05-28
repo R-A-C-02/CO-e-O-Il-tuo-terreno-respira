@@ -24,13 +24,13 @@ def trova_stazione_piu_vicina(x, y):
 # Connessione al database
 
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL_geo_station")
 conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
 
 query = """
 SELECT id, ST_X(centroid) AS longitude, ST_Y(centroid) AS latitude
-FROM plots WHERE id = variabile;
+FROM plots;
 """
 cur.execute(query)
 rows = cur.fetchall()

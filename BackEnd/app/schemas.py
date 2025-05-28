@@ -1,13 +1,14 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
-
-
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, TIMESTAMP, func
+from typing import List
 # ===== USER =====
 
 class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+    id : int
+    email : str
+    password : str
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -82,8 +83,6 @@ class PlotOut(PlotBase):
     user_id: int
     geom: dict
     centroid: Optional[dict] = None
-    total_co2_absorption: Optional[float] = 0
-    total_o2_production: Optional[float] = 0
     created_at: datetime
     class Config:
         orm_mode = True
@@ -141,8 +140,64 @@ class WeatherDataOut(WeatherDataBase):
         orm_mode = True
 
 
+class SpeciesSave(BaseModel):
+    name: str
+    quantity: int
+
+class Centroid(BaseModel):
+    lat: float
+    long: float
+
+class Coordinate(BaseModel):
+    lat: float
+    long: float
+
+class Vertice(BaseModel):
+    lat: float
+    long: float
 
 
+class CalcoloRequest(BaseModel):
+    terreno: List[PlotBase]
+    vegetazione: List[PlotSpeciesBase]
+
+    class Config:
+        orm_mode = True
+
+
+class CalcoloResponse(BaseModel):
+    co2_giornaliera: float
+    o2_giornaliera: float
+    dettaglio_per_specie: List[dict]  # Esempio: {"nome": "quercia", "co2": 12.4, "o2": 8.1} (vogliamo farlo così?)
+
+class SaveCoordinatesRequest(BaseModel):
+    id: int
+    terrainName: str
+    species: list[SpeciesSave]
+    centroid: Centroid
+    vertices: List[Coordinate]
+    created_at: datetime
+    class Config:
+        orm_mode = True
+
+class SaveCoordinatesResponse(BaseModel):
+    message : str
+    terrain_id: int
+
+class ClassificaRequest(BaseModel):
+    criterio: str
+
+class ClassificaResponse(BaseModel):
+    Classifica: List[dict]
+
+class EsportaRequest(BaseModel):
+    # campi di esempio, da adattare alle tue necessità
+    formato: str
+    dati: Optional[List[dict]] = None
+
+class EsportaResponse(BaseModel):
+    esito: str
+    url_file: Optional[str] = None
 
 #pip install fastapi uvicorn sqlalchemy geoalchemy2 shapely psycopg2-binary
 

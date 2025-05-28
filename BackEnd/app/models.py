@@ -7,15 +7,6 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
-class EsportaRequest(BaseModel):
-    # campi di esempio, da adattare alle tue necessità
-    formato: str
-    dati: Optional[List[dict]] = None
-
-class EsportaResponse(BaseModel):
-    esito: str
-    url_file: Optional[str] = None
-
 class PlotBase(BaseModel):
     id: Optional[int]
     name: Optional[str]
@@ -125,21 +116,7 @@ class PlotSpecies(Base):
     actual_co2_absorption = Column(Float)
     actual_o2_production = Column(Float)
 
-class SpeciesSave(BaseModel):
-    name: str
-    quantity: int
 
-class Centroid(BaseModel):
-    lat: float
-    long: float
-
-class Coordinate(BaseModel):
-    lat: float
-    long: float
-
-class Vertice(BaseModel):
-    lat: float
-    long: float
 # --- WEATHER DATA ---
 class WeatherData(Base):
     __tablename__ = "weather_data"
@@ -153,37 +130,6 @@ class WeatherData(Base):
     total_co2_absorption = Column(Float)
     total_o2_production = Column(Float)
 
-
-class CalcoloRequest(BaseModel):
-    terreno: List[PlotBase]
-    vegetazione: List[PlotSpeciesBase]
-
-    class Config:
-        orm_mode = True
-
-
-class CalcoloResponse(BaseModel):
-    co2_giornaliera: float
-    o2_giornaliera: float
-    dettaglio_per_specie: List[dict]  # Esempio: {"nome": "quercia", "co2": 12.4, "o2": 8.1} (vogliamo farlo così?)
-
-class SaveCoordinatesRequest(BaseModel):
-    id: int
-    terrainName: str
-    species: list[SpeciesSave]
-    centroid: Centroid
-    vertices: List[Coordinate]
-
-
-class SaveCoordinatesResponse(BaseModel):
-    message : str
-    terrain_id: int
-
-class ClassificaRequest(BaseModel):
-    criterio: str
-
-class ClassificaResponse(BaseModel):
-    Classifica: List[dict]
 
     # se vuoi puoi aggiungere questi campi, ma nel DB li hai commentati
     # total_co2_absorption = Column(Float)

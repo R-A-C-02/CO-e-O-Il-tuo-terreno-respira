@@ -1,10 +1,10 @@
-from app.models import Plot, Species, PlotSpecies
-from app.schemas import SaveCoordinatesRequest, SaveCoordinatesResponse
-from app.database import SessionLocal
+from BackEnd.app.models import Plot, Species, PlotSpecies
+from BackEnd.app.schemas import SaveCoordinatesRequest, SaveCoordinatesResponse
+from BackEnd.app.database import SessionLocal
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Polygon, Point
 from sqlalchemy import select
-from app.util.co2_o2_calculator.co2_o2_calculator import get_coefficients_from_db, calculate_co2_o2_hourly
+from BackEnd.app.util.co2_o2_calculator.co2_o2_calculator import get_coefficients_from_db, calculate_co2_o2_hourly
 def calcola_impatti(payload):
     coefficients = get_coefficients_from_db()
 

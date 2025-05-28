@@ -86,3 +86,5 @@ def fetch_weather_week(plot_id, lat, lon):
 
     print("✅ Dati meteo settimanali ottenuti.")
     return data
+
+print(fetch_weather_week(plot_id, latitude, longitude))

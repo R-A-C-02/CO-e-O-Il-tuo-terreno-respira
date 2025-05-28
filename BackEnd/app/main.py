@@ -27,7 +27,7 @@ async def startup():
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    return templates.TemplateResponse("homepage_bottone_demo.html", {"request": request})
+    return templates.TemplateResponse("homepagedefinitiva.html", {"request": request})
 
 @app.get("/calcola", response_model=CalcoloResponse)
 async def calcola_impatti_ambientali(payload: CalcoloRequest):

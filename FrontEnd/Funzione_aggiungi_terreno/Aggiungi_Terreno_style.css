@@ -41,6 +41,7 @@ header {
 }
 
 .site-title {
+    font-family: 'Merriweather', serif;
     margin: 0;
     color: white;
     font-size: 1.8em;
@@ -51,30 +52,44 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
-    cursor: pointer;
-    padding: 5px 10px;
-    border-radius: 25px;
-    transition: background-color 0.3s ease;
-    background-color: var(--primary-green); /* Aggiunto/Modificato questo */
-
 }
 
-.user-profile:hover {
-    background-color: #3cb371;
-}
-
-.user-profile img {
-    width: 40px;
+.home-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; 
     height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
+    padding: 5px; 
+    border-radius: 50%; 
+    background-color: var(--primary-green); 
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer; 
+}
+
+.home-icon:hover {
+    background-color: var(--dark-green); 
+    transform: scale(1.05); 
+}
+
+.home-icon svg {
+    width: 100%;
+    height: 100%;
 }
 
 .user-profile span {
     font-weight: 700;
     color: white;
     font-size: 1.1em;
+    background-color: var(--primary-green); 
+    padding: 8px 15px; 
+    border-radius: 25px; 
+    transition: transform 0.2s ease; 
+    cursor: default; 
+}
+
+.user-profile span:hover {
+    transform: scale(1.03); 
 }
 
 .hamburger-button {
@@ -94,7 +109,7 @@ header {
     display: block;
     width: 100%;
     height: 3px;
-    background-color: var(--text-color);
+    background-color: white; 
     border-radius: 2px;
     transition: all 0.3s ease;
 }
@@ -105,7 +120,7 @@ header {
 
 #container {
     display: flex;
-    height: calc(100vh - 70px); /* Full viewport height minus header */
+    height: calc(100vh - 70px); 
     overflow: hidden;
 }
 
@@ -135,16 +150,17 @@ header {
 #main-content-area {
     flex: 1;
     display: flex;
-    flex-wrap: wrap; /* Allows sections to wrap on smaller screens */
-    gap: 15px; /* Space between sections */
+    flex-wrap: wrap; 
+    gap: 15px; 
     padding: 15px;
-    overflow-y: auto; /* Allows content to scroll if it overflows vertically */
+    overflow-y: auto; 
+    overflow-x: hidden; 
 }
 
 #main-map-container {
-    flex: 1 1 48%; /* Allows map to grow/shrink, starts at ~48% width */
-    min-width: 400px; /* Minimum width for the map */
-    height: 500px; /* Fixed height for the map */
+    flex: 1 1 48%; 
+    min-width: 0; 
+    height: 500px; 
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -165,53 +181,48 @@ header {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height: 500px; /* <-- ALTEZZA FISSA*/
 }
 
-/* Common styles for dashboard sections */
 .dashboard-section {
     background-color: var(--white-bg);
     padding: 20px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    margin-bottom: 0; /* Remove default margin-bottom, gap handles it */
-    flex: 1 1 100%; /* Make them take full width below map/details initially, adjusted by .info-panel-row */
+    margin-bottom: 0; 
+    flex: 1 1 100%; 
+    min-width: 0; 
 }
 
-/* Styles for new Address and Coordinates sections */
 #coordinates-section,
-#polygon-vertices-section { /* Aggiunto la nuova sezione */
+#polygon-vertices-section { 
     background-color: var(--white-bg);
     padding: 20px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    flex: 1 1 calc(33% - 10px); /* Adjusted to sit side-by-side below the map/details, accounting for gap */
-    min-width: 300px; /* Ensure they don't get too small */
-    margin-top: 0; /* Gap handles spacing */
+    flex: 1 1 calc(33% - 10px); 
+    min-width: 0; 
+    margin-top: 0; 
 }
 
-/* Aggiunto questa regola per #coordinates-section */
 #coordinates-section {
-    display: flex; /* Rendi un contenitore flex */
-    flex-direction: column; /* Impila i suoi figli verticalmente */
-    gap: 10px; /* Mantiene lo spazio tra gli elementi esistenti */
-    /* Aggiungi questo per permettere al flex container di gestire lo spazio */
-    justify-content: flex-start; /* Allinea gli elementi all'inizio */
-    align-items: stretch; /* Fai in modo che gli elementi si estendano in larghezza */
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    justify-content: flex-start; 
+    align-items: stretch; 
 }
 
-/* Regola per il bottone all'interno di #coordinates-section */
 #coordinates-section button {
-    width: 100%; /* Già presente, ma assicuriamoci che copra l'intera larghezza */
-    /* Questa è la proprietà chiave per spostare il bottone in basso */
+    width: 100%; 
     margin-top: auto;
 }
 
-/* New container to hold address, coordinates and vertices side-by-side below map/details */
 .info-panel-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px; /* Spacing between address and coordinates sections */
-    flex: 1 1 100%; /* Take full width below the main row (map/details) */
+    gap: 15px; 
+    flex: 1 1 100%; 
 }
 
 #coordinates-section p {
@@ -220,10 +231,9 @@ header {
     word-wrap: break-word;
 }
 
-/* Stili per la nuova sezione vertici */
 #polygon-vertices-section .vertices-list {
-    max-height: 200px; /* Limita l'altezza per lo scroll */
-    overflow-y: auto; /* Abilita lo scroll verticale */
+    max-height: 200px; 
+    overflow-y: auto; 
     border: 1px solid var(--border-color);
     border-radius: 5px;
     padding: 10px;
@@ -263,6 +273,17 @@ input[type="text"], input[type="number"] {
     border: 1px solid var(--border-color);
     border-radius: 5px;
     font-size: 1em;
+}
+
+select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 5px;
+    margin-bottom: 15px; 
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: var(--white-bg); 
 }
 
 button {
@@ -332,7 +353,6 @@ h4 {
     margin-top: 20px;
 }
 
-/* Styles for "My Terrains" list (in sidebar) */
 .terreno-input-group {
     display: flex;
     align-items: center;
@@ -425,18 +445,23 @@ h4 {
     color: var(--dark-blue);
 }
 
-/* Styles for multiple species input (in details section) */
 .species-list {
     list-style: none;
-    padding: 0;
+    /* padding: 0; */ /* Rimosso perché specificato sotto con più dettaglio */
     margin-top: 10px;
+    /* Aggiunte per la barra di scorrimento */
+    max-height: 200px; /* Imposta un'altezza massima per la lista (puoi aggiustare questo valore) */
+    overflow-y: auto; /* Mostra la barra di scorrimento verticale se il contenuto eccede max-height */
+    border: 1px solid var(--border-color); /* Aggiunge un bordo per delimitare meglio l'area scrollabile */
+    border-radius: 4px; /* Arrotonda gli angoli del bordo della lista */
+    padding: 10px; /* Aggiunge un po' di padding interno alla lista */
 }
 
 .species-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 8px 0; /* Padding verticale per gli item, orizzontale gestito dal contenitore .species-list */
     border-bottom: 1px dashed var(--border-color);
 }
 
@@ -464,25 +489,85 @@ h4 {
 
 .species-input-group {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 15px;
+    align-items: center; 
 }
 
-.species-input-group input {
-    flex: 1;
-    min-width: 120px;
+.species-input-group input[type="text"],
+.species-input-group select { /* ANCORA PRESENTE per stili generali se altri select sono usati qui */
+    flex: 1; 
+    min-width: 0; 
     margin-bottom: 0;
+    padding: 10px 12px; 
+    border: 1px solid var(--border-color); 
+    border-radius: 5px; 
+    font-size: 1em; 
 }
 
-.species-input-group button {
-    width: auto;
-    padding: 8px 12px;
-    font-size: 0.9em;
-    white-space: nowrap;
+/* Stili specifici per il nuovo input di testo delle specie */
+#new-species-name-input {
+    /* Eredita gli stili da .species-input-group input[type="text"] */
+    box-sizing: border-box; /* Assicura che padding e border siano inclusi nella larghezza totale */
 }
 
-/* Specific styles for inputs in details section */
+/* Stili per il contenitore dei suggerimenti */
+#species-suggestions-dropdown {
+    display: none; 
+    position: absolute;
+    top: 100%; /* Posizionalo subito sotto l'input. */
+    left: 0;
+    right: 0; /* Si estenderà per tutta la larghezza del .species-name-input-wrapper */
+    background-color: var(--white-bg);
+    border: 1px solid var(--border-color);
+    border-top-width: 0; 
+    z-index: 1050; 
+    max-height: 150px; 
+    overflow-y: auto;  
+    box-sizing: border-box;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1); 
+}
+
+.suggestion-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.95em; 
+    color: var(--text-color);
+    border-bottom: 1px solid var(--light-bg); 
+}
+
+.suggestion-item:last-child {
+    border-bottom: none; 
+}
+
+.suggestion-item:hover {
+    background-color: var(--light-bg);
+}
+
+
+.add-species-icon-button {
+    background: none; 
+    border: none; 
+    padding: 0; 
+    width: 40px; 
+    height: 40px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    flex-shrink: 0; 
+}
+
+.add-species-icon-button:hover {
+    transform: scale(1.1); 
+}
+
+.add-species-icon-button svg {
+    width: 100%;
+    height: 100%;
+}
+
 #selected-terrain-details input[type="text"] {
     margin-bottom: 0;
 }
@@ -497,33 +582,32 @@ h4 {
     min-width: 150px;
 }
 
-/* Nuovo stile per la casella di ricerca indirizzo nella sidebar */
 .address-search-sidebar {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 15px; /* Spazio tra la ricerca e i terreni */
+    margin-bottom: 15px; 
 }
 
 .address-search-sidebar input {
     flex-grow: 1;
-    margin-bottom: 0; /* Rimuove il margine inferiore predefinito */
+    margin-bottom: 0; 
 }
 
 .address-search-sidebar .search-address-button,
-.address-search-sidebar .clear-pin-button { /* Applica stili simili al nuovo pulsante */
+.address-search-sidebar .clear-pin-button { 
     background-color: var(--primary-blue);
     color: white;
-    border-radius: 50%; /* Rendi il pulsante rotondo */
-    width: 40px; /* Larghezza fissa */
-    height: 40px; /* Altezza fissa */
-    min-width: 40px; /* Assicura che non si restringa */
-    min-height: 40px; /* Assicura che non si restringa */
-    padding: 0; /* Rimuovi padding interno */
+    border-radius: 50%; 
+    width: 40px; 
+    height: 40px; 
+    min-width: 40px; 
+    min-height: 40px; 
+    padding: 0; 
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.2em; /* Dimensione icona */
+    font-size: 1.2em; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -535,17 +619,16 @@ h4 {
 }
 
 .address-search-sidebar .clear-pin-button {
-    background-color: #dc3545; /* Colore rosso per il pulsante di cancellazione */
+    background-color: #dc3545; 
 }
 
 .address-search-sidebar .clear-pin-button:hover {
-    background-color: #c82333; /* Colore rosso più scuro al hover */
+    background-color: #c82333; 
 }
 
-/* Aggiunte per la tabella "Dettagli" */
 #terreni-table {
-    width: 100%; /* Assicura che la tabella occupi tutta la larghezza disponibile */
-    table-layout: fixed; /* Forza le colonne ad avere larghezza fissa */
+    width: 100%; 
+    table-layout: fixed; 
     border-collapse: collapse;
     margin-top: 15px;
 }
@@ -555,48 +638,47 @@ h4 {
     padding: 10px;
     border: 1px solid var(--border-color);
     text-align: left;
-    word-wrap: break-word; /* Permette al testo lungo di andare a capo */
+    word-wrap: break-word; 
 }
 
 #terreni-table thead tr {
     background-color: var(--light-bg);
 }
 
-/* Media query per schermi più piccoli */
 @media (max-width: 768px) {
     #terreni-table {
-        display: block; /* Rende la tabella un blocco per lo scroll orizzontale */
-        overflow-x: auto; /* Abilita lo scroll orizzontale se il contenuto è troppo largo */
-        white-space: nowrap; /* Impedisce alle celle di andare a capo */
+        display: block; 
+        overflow-x: auto; 
+        white-space: nowrap; 
     }
 
     #terreni-table thead, #terreni-table tbody, #terreni-table th, #terreni-table td, #terreni-table tr {
-        display: block; /* Ogni elemento della tabella diventa un blocco */
+        display: block; 
     }
 
     #terreni-table thead tr {
         position: absolute;
         top: -9999px;
-        left: -9999px; /* Nasconde l'intestazione originale */
+        left: -9999px; 
     }
 
     #terreni-table tr {
         border: 1px solid var(--border-color);
         margin-bottom: 10px;
         border-radius: var(--border-radius);
-        overflow: hidden; /* Nasconde eventuali bordi extra */
+        overflow: hidden; 
     }
 
     #terreni-table td {
-        border: none; /* Rimuove i bordi delle celle */
-        border-bottom: 1px solid var(--border-color); /* Aggiunge un bordo inferiore per separare le righe */
+        border: none; 
+        border-bottom: 1px solid var(--border-color); 
         position: relative;
-        padding-left: 50%; /* Spazio per l'etichetta della colonna */
-        text-align: right; /* Allinea il contenuto a destra */
+        padding-left: 50%; 
+        text-align: right; 
     }
 
     #terreni-table td:before {
-        content: attr(data-label); /* Usa l'attributo data-label per l'etichetta */
+        content: attr(data-label); 
         position: absolute;
         left: 6px;
         width: 45%;
@@ -609,7 +691,7 @@ h4 {
 }
 
 
-@media (max-width: 992px) { /* Breakpoint for single column layout on mobile */
+@media (max-width: 992px) { 
     #container {
         flex-direction: column;
     }
@@ -636,7 +718,7 @@ h4 {
     #main-map-container,
     #selected-terrain-details,
     .dashboard-section,
-    .info-panel-row { /* Apply to the new row container as well */
+    .info-panel-row { 
         flex: 1 1 100%;
         min-width: unset;
         height: auto;
@@ -646,9 +728,8 @@ h4 {
         height: 50vh;
     }
 
-    /* For address and coordinates section on smaller screens, make them stack */
     #coordinates-section,
-    #polygon-vertices-section { /* Anche la sezione vertici */
+    #polygon-vertices-section { 
         flex: 1 1 100%;
     }
 }

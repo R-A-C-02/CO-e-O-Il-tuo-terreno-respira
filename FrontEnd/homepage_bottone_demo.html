@@ -16,7 +16,7 @@
             --accent-green: #4CAF50;   /* Verde accentato per hover e elementi importanti */
             --text-color: #4CAF50;     /* Colore testo generico, un po' più chiaro */
             --shadow-color: rgba(76, 175, 80, 0.2); /* Ombra basata sul verde principale */
-            --white-transparent: rgba(255, 255, 255, 0.95);
+            --white-transparent: rgba(255, 255, 255, 0.862);
         }
 
         body {
@@ -42,7 +42,7 @@
             width: 100%;
             height: 100%;
             /* Modificato il gradiente per meno bianco e aggiunto un leggero blur */
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.85) 100%);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.073) 0%, rgba(255, 255, 255, 0.577) 50%, rgba(255, 255, 255, 0.626) 100%);
             backdrop-filter: blur(2px); /* Aggiunto effetto sfocatura */
             -webkit-backdrop-filter: blur(2px); /* Per compatibilità Safari */
             z-index: -1;
@@ -114,9 +114,8 @@
             width: 100%;
         }
 
-        /* Stile per i bottoni "Accedi / Registrati" e "Vai alla Dashboard" */
+        /* Stile per i bottoni "Accedi / Registrati"*/
         .btn-auth-register,
-        .btn-dashboard,
         .btn-demo { /* Aggiunto anche il bottone della demo */
             background-color: var(--primary-green); /* Usa il verde primario */
             color: white;
@@ -127,7 +126,7 @@
             box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
             text-decoration: none;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            display: inline-block; /* o inline-flex */
+            display: inline-flex; 
             width: 160px;            /* permette al bottone di adattarsi */
             justify-content: center;     /* centra orizzontalmente */
             align-items: center;         /* centra verticalmente */
@@ -137,7 +136,6 @@
         }
 
         .btn-auth-register:hover,
-        .btn-dashboard:hover,
         .btn-demo:hover { /* Aggiunto anche il bottone della demo */
             background-color: var(--accent-green);
             transform: translateY(-1px);
@@ -351,14 +349,22 @@
         }
 
         /* Sezione "Benefici" */
-        .benefits ul {
-            list-style: none;
-            padding: 0;
-            margin-top: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
+.benefits ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+    display: grid;
+    /* Modifica qui: imposta esplicitamente 2 colonne */
+    grid-template-columns: repeat(2, 1fr); /* Due colonne di uguale larghezza */
+    gap: 1.5rem;
+}
+
+/* Mantieni le regole per schermi più piccoli */
+@media (max-width: 900px) {
+    .features, .benefits ul {
+        grid-template-columns: 1fr; /* Una colonna per mobile */
+    }
+}
 
         .benefits li {
             background: rgba(255, 255, 255, 0.9);
@@ -553,7 +559,7 @@
                 width: 100%;
             }
             .navbar .auth-buttons .btn-auth-register,
-            .navbar .auth-buttons .btn-dashboard {
+            .navbar .auth-buttons {
                 width: 80%; /* I bottoni sono l'80% della larghezza del menu mobile */
                 text-align: center;
                 margin-left: 0; /* Rimuovi margine a sinistra per mobile */
@@ -651,8 +657,7 @@
         <li><a href="#testimonianze"><i class="fas fa-comments"></i> Testimonianze</a></li>
         <li><a href="#contatti"><i class="fas fa-envelope"></i> Contatti</a></li>
         <li class="desktop-only">
-            <a href="auth.html" class="btn-auth-register">Accedi / Registrati</a>
-            <a href="dashboard.html" class="btn-dashboard">Vai alla Dashboard</a>
+            <a href="login_main.html" class="btn-auth-register">Accedi / Registrati</a>
         </li>
     </ul>
 
@@ -663,7 +668,7 @@
 
 <header class="hero-section">
     <div class="title-container">
-        <img src="logo_airvana_ok.png" alt="Logo del sito" class="logo" style="width: 120px; height: auto;">
+        <img src="airvanalogotondo.png" alt="Logo del sito" class="logo" style="width: 120px; height: auto;">
         <h1>Airvana: Il Terreno che Respira!</h1>
         <p>Visualizza l’impatto ambientale del tuo terreno in tempo reale</p>
     </div>

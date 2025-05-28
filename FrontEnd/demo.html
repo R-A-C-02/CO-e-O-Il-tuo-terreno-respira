@@ -23,9 +23,25 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--background-color);
+            background: url('foglie.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: var(--text-color);
             line-height: 1.6;
+        }
+
+        /* Overlay per migliorare la leggibilità del testo sul background, con sfocatura e trasparenza */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Modificato il gradiente per meno bianco e aggiunto un leggero blur */
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.073) 0%, rgba(255, 255, 255, 0.577) 50%, rgba(255, 255, 255, 0.626) 100%);
+            backdrop-filter: blur(2px); /* Aggiunto effetto sfocatura */
+            -webkit-backdrop-filter: blur(2px); /* Per compatibilità Safari */
+            z-index: -1;
         }
 
         header {
@@ -160,10 +176,7 @@
             align-self: center; /* Centra i pulsanti all'interno del flex container */
         }
 
-        /* Stile Grafici */
-        .charts-section {
-            /* Rimosso display grid/flex direttamente qui, il container interno gestirà l'allineamento */
-        }
+
 
         .charts-container-wrapper { /* Nuovo wrapper per i grafici */
             display: flex;
@@ -215,6 +228,30 @@
             transform: none;
         }
 
+        .bottone-container {
+            display: flex;
+            justify-content: center; /* centra orizzontalmente */
+            margin-top: auto;
+            margin-bottom: 40px; /* distanza dal fondo */
+        }
+
+        .btn-home {
+            background-color: rgb(43, 96, 187);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 180px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background-color: rgb(118, 196, 241);
+            transform: translateY(-2px);
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -257,7 +294,7 @@
 
     <header class="hero-section">
         <div class="title-container">
-            <img src="logo_airvana_ok.png" alt="Logo del sito" class="logo" style="width: 120px; height: auto;">
+            <img src="airvanalogotondo.png" alt="Logo del sito" class="logo" style="width: 120px; height: auto;">
             <h1>Prova Airvana!</h1>
             <p>La demo gratuita ti permette di disegnare, analizzare e gestire il tuo terreno.</p>
         </div> 
@@ -309,6 +346,9 @@
                 </div>
             </div>
         </section>
+        <div class="bottone-container">
+        <button class="btn-home" onclick="window.location.href='homepage_bottone_demo.html'">Torna alla Home</button>
+        </div>
     </main>
 
     <footer>

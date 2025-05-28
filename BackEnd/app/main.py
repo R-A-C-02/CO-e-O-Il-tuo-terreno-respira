@@ -53,6 +53,6 @@ async def Esporta(payload: EsportaRequest):
 
 #pip install uvicorn
 
-#uvicorn app.main:app --reload
+#uvicorn BackEnd.app.main:app --reload
 
 #http://localhost:8000

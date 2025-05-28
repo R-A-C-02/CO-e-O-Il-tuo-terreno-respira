@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from models import WeatherData
-from parte_finale_connect_db import recupero_coords_geocentroide
+from BackEnd.app.models import WeatherData
+from BackEnd.app.parte_finale_connect_db import recupero_coords_geocentroide
 
 coords = list(recupero_coords_geocentroide().values())
 # {'plot_id': 1, 'latitudine': 41.8902, 'longitudine': 12.4924}
@@ -86,5 +86,3 @@ def fetch_weather_week(plot_id, lat, lon):
 
     print("✅ Dati meteo settimanali ottenuti.")
     return data
-
-print(fetch_weather_week(plot_id, latitude, longitude))

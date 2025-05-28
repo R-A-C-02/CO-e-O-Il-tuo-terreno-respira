@@ -1,11 +1,10 @@
-# utils.py
 from app.models import Plot, Species, PlotSpecies
 from app.schemas import SaveCoordinatesRequest, SaveCoordinatesResponse
 from app.database import SessionLocal
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Polygon, Point
 from sqlalchemy import select
-from app.utils import get_coefficients_from_db, calculate_co2_o2_hourly
+from app.util.co2_o2_calculator.co2_o2_calculator import get_coefficients_from_db, calculate_co2_o2_hourly
 def calcola_impatti(payload):
     coefficients = get_coefficients_from_db()
 
@@ -47,9 +46,6 @@ async def inserisci_terreno(payload: SaveCoordinatesRequest) -> SaveCoordinatesR
         await db.flush()  # ottieni plot.id
 
 
-        
-
-
         for specie_input in payload.species:
             # Recupera o fallisce se specie non esiste
             result = await db.execute(select(Species).where(Species.name == specie_input.name))
@@ -57,27 +53,14 @@ async def inserisci_terreno(payload: SaveCoordinatesRequest) -> SaveCoordinatesR
             if not specie:
                 raise ValueError(f"Specie '{specie_input.name}' non trovata nel DB")
 
-            co2 = specie.co2_absorption_rate * specie_input.surface_area
-            o2 = specie.o2_production_rate * specie_input.surface_area
-
-            co2o2=calcola_impatti(payload)
-
-            total_co2 = co2o2[0]
-            total_o2 = co2o2[1]
 
             # Crea record PlotSpecies
             ps = PlotSpecies(
                 plot_id=plot.id,
                 species_id=specie.id,
                 surface_area=specie_input.surface_area,
-                actual_co2_absorption=co2,
-                actual_o2_production=o2
             )
             db.add(ps)
-
-        # Aggiorna valori totali nel plot
-        plot.total_co2_absorption = total_co2
-        plot.total_o2_production = total_o2
 
         await db.commit()
 

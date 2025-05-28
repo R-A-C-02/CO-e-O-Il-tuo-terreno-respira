@@ -1,20 +1,16 @@
 from geopy.distance import geodesic
+import pandas as pd
+import psycopg2 
+from dotenv import load_dotenv
+import os
 
-def trova_stazione_piu_vicina(terreno, punti_meteo):
-    '''
-    Trova la stazione meteo più vicina al terreno.
-    
-    :param terreno: tuple (lat, lon) delle coordinate del terreno
-    :param punti_meteo: lista di tuple (nome, lat, lon) delle stazioni meteo
-    :return: nome della stazione più vicina e la distanza in km
-    '''
-
+def trova_stazione_piu_vicina(x, y):
     stazione_piu_vicina = None
     distanza_minima = float('inf')
     
-    for nome, lat, lon in punti_meteo:
+    for nome, lat, lon in y:
         try:
-            distanza = geodesic(terreno, (lat, lon)).kilometers
+            distanza = geodesic(x, (lat, lon)).kilometers
             if distanza < distanza_minima:
                 distanza_minima = distanza
                 stazione_piu_vicina = nome
@@ -25,24 +21,49 @@ def trova_stazione_piu_vicina(terreno, punti_meteo):
 
 
 
+# Connessione al database
 
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+conn = psycopg2.connect(DATABASE_URL)
+cur = conn.cursor()
 
+query = """
+SELECT id, ST_X(centroid) AS longitude, ST_Y(centroid) AS latitude
+FROM plots WHERE id = variabile;
+"""
+cur.execute(query)
+rows = cur.fetchall()
 
-# Esempio di utilizzo:
 
 # Coordinate del terreno (sostituisci con le tue coordinate)
-lat_terreno = 45.1234
-lon_terreno = 9.5678
-terreno = (lat_terreno, lon_terreno)
+diz_centroide = {}
 
-# Lista di stazioni meteo (aggiungi le tue stazioni)
-punti_meteo = [
-    ('Stazione1', 45.1240, 9.5680),
-    ('Stazione2', 45.1300, 9.5600),
-    ('Stazione3', 45.1150, 9.5800),
-]
+for row in rows:
+    plot_id = row[0]
+    longitude = row[1]
+    latitude = row[2]
 
-# Trova la stazione più vicina
-stazione, distanza = trova_stazione_piu_vicina(terreno, punti_meteo)
+    diz_centroide[plot_id] = {
+        'latitude': latitude,
+        'longitude': longitude
+    }
 
-print(f"\nLa stazione meteo più vicina al terreno è: {stazione} a circa {distanza:.2f} km")
+# Chiudere la connessione
+cur.close()
+conn.close()
+
+#centroide_terreno = (diz_centroide['latitude'], diz_centroide['longitude'])
+for plot_id, coords in diz_centroide.items():
+    print(f"Plot ID {plot_id}:Latitude {coords['latitude']}, Longitude {coords['longitude']}")
+
+
+# # Lista di stazioni meteo 
+# df = pd.read_csv('stazioni_meteo_ITALIA_pulite.csv')
+# punti_meteo = df.values.tolist()
+# # print (punti_meteo)
+
+# # Trova la stazione più vicina
+# stazione, distanza = trova_stazione_piu_vicina(centroide_terreno, punti_meteo)
+
+# print(f"\nLa stazione meteo più vicina al terreno è: {stazione} a circa {distanza:.2f} km")

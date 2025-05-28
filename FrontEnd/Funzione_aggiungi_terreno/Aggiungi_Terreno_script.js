@@ -589,7 +589,7 @@ async function saveData() {
     updateDashboard();
     showCustomAlert(`Dati per "${terreno.name}" salvati!`);
 
-    const backendUrl = 'http://localhost:3001/save-coordinates';
+    const backendUrl = 'http://localhost:8000/save-coordinates';
     let centroidCoords = null;
     const centroidDisplay = document.getElementById("centroid-display").textContent;
     const centroidMatch = centroidDisplay.match(/Lat ([\d.]+), Lon ([\d.]+)/);
@@ -609,6 +609,9 @@ async function saveData() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                id: terreno.id,
+                terrainName: terreno.name,
+                species: terreno.species,
                 centroid: centroidCoords,
                 vertices: polygonVertices
             })

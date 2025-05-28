@@ -381,12 +381,38 @@ function handleFormSubmit(event) {
 
     if (form.id === 'loginFormReal') {
         console.log('Tentativo di Login:', data);
+        //chiamata alla request
         if (data.loginEmail && data.loginPassword) {
-             showMessage(`Login effettuato (simulato) con:\nEmail: ${data.loginEmail}`);
-             // Qui andrebbe la vera logica di autenticazione
+           const formData = new FormData();
+           formData.append('loginEmail', data.loginEmail);
+           formData.append('loginPassword', data.loginPassword);
+
+            fetch('http://localhost:8000/login', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(async (res) => {
+                if (!res.ok) {
+                    // Prova a leggere messaggio d'errore dal server
+                    const errorData = await res.json().catch(() => null);
+                    throw new Error(errorData?.detail || 'Errore durante il login');
+                }
+                // Il backend risponde con HTML
+                return res.text();
+            })
+            .then(html => {
+                // Puoi fare redirect o sostituire il contenuto della pagina con la risposta HTML
+                // window.location.href = 'index.html'; // se vuoi redirect
+                document.body.innerHTML = html; // oppure aggiorna la pagina con il contenuto ricevuto
+            })
+            .catch(error => {
+                console.error('Errore fetch login:', error);
+                showMessage("Errore di connessione col server o credenziali non valide.");
+            });
         } else {
-            showMessage("Per favor, inserisci email e password.");
+            showMessage("Per favore, inserisci email e password.");
         }
+
     } else if (form.id === 'registerUserForm') {
         console.log('Tentativo di Registrazione Utente:', data);
         

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Security
+from fastapi import APIRouter, HTTPException, Depends, Security, Request, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -10,12 +10,12 @@ from BackEnd.app.database import SessionLocal
 from BackEnd.app.get_meteo import fetch_and_save_weather_day, fetch_weather_week
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from fastapi import Request
+
 ###############
 
 router = APIRouter()
 security = HTTPBearer()  # definisce il tipo di security scheme Bearer
-templates = Jinja2Templates(directory="FrontEnd")
+templates = Jinja2Templates(directory="FrontEnd/templates")
 async def get_db():
     async with SessionLocal() as session:
         yield session
@@ -38,18 +38,43 @@ async def register(request: Request,user: UserCreate, db: AsyncSession = Depends
     await db.commit()
     return {"message": "Registrazione completata"}
 
+# @router.post("/login", response_class=HTMLResponse)
+# async def login(request: Request, user: UserLogin, db: AsyncSession = Depends(get_db)):
+#     result = await db.execute(select(User).where(User.email == user.email))
+#     db_user = result.scalar_one_or_none()
+
+#     if not db_user or not verify_password(user.password, db_user.password):
+#         raise HTTPException(status_code=401, detail="Credenziali non valide")
+
+#     token = create_access_token({"id": db_user.id, "mail": db_user.email})
+
+#     return templates.TemplateResponse(
+#         "AggiornamentiDash/DashBoardFinale/index.html",
+#         {
+#             "request": request,
+#             "user_id": db_user.id,
+#             "email": db_user.email,
+#             "token": token
+#         }
+#     )
+
 @router.post("/login", response_class=HTMLResponse)
-async def login(request: Request, user: UserLogin, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == user.email))
+async def login(
+    request: Request,
+    loginEmail: str = Form(...),
+    loginPassword: str = Form(...),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(User).where(User.email == loginEmail))
     db_user = result.scalar_one_or_none()
 
-    if not db_user or not verify_password(user.password, db_user.password):
+    if not db_user or not verify_password(loginPassword, db_user.password):
         raise HTTPException(status_code=401, detail="Credenziali non valide")
 
     token = create_access_token({"id": db_user.id, "mail": db_user.email})
 
     return templates.TemplateResponse(
-        "AggiornamentiDash/DashBoardFinale/index.html",
+        "index.html",
         {
             "request": request,
             "user_id": db_user.id,
@@ -57,9 +82,10 @@ async def login(request: Request, user: UserLogin, db: AsyncSession = Depends(ge
             "token": token
         }
     )
+#
 
 @router.post("/inserisciterreno", response_class=HTMLResponse)
-async def login(request: Request, user: UserInsert):
+async def inserisciterreno(request: Request, user: UserInsert):
     
     token = create_access_token({"id": user.id, "mail": user.email})
 

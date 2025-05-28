@@ -10,15 +10,22 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="FrontEnd"), name="static")
-
+app.mount("/static", StaticFiles(directory="FrontEnd/static"), name="static")
 # Imposta FrontEnd come directory dei template
-templates = Jinja2Templates(directory="FrontEnd")
-app = FastAPI()
-
+templates = Jinja2Templates(directory="FrontEnd/templates")
 app.include_router(router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5500"],  # Metti qui l'URL del tuo frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def startup():
@@ -26,7 +33,7 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
+async def root(request: Request): #async def home(request: Request):
     return templates.TemplateResponse("homepagedefinitiva.html", {"request": request})
 
 @app.get("/calcola", response_model=CalcoloResponse)
@@ -35,15 +42,15 @@ async def calcola_impatti_ambientali(payload: CalcoloRequest):
 
 #inserimento plot (jherson)
 @app.post("/save-coordinates", response_model=SaveCoordinatesResponse)
-async def inserisci_terreno(payload: SaveCoordinatesRequest):
+async def inserisci_coordinate(payload: SaveCoordinatesRequest):
     return await inserisci_terreno(payload)
 
 @app.get("/classifica", response_model=ClassificaResponse)
-async def mostra_classifica(payload: ClassificaRequest):
+async def get_classifica(payload: ClassificaRequest):
     return await mostra_classifica(payload)
 
 @app.get("/esporta", response_model=EsportaResponse)
-async def Esporta(payload: EsportaRequest):
+async def esporta_pdf(payload: EsportaRequest):
     return await Esporta(payload)
 
 #@app.get("/getmeteo", response_model=MeteoResponse)

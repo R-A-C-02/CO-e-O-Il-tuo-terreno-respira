@@ -2,9 +2,11 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
-
+###
 # Carica le variabili da .env
 load_dotenv()
+
+####
 
 # Leggi le variabili da ambiente
 SECRET_KEY = os.getenv("SECRET_KEY")

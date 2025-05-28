@@ -8,6 +8,8 @@ from app.models import User
 from app.security import hash_password, verify_password
 from app.database import SessionLocal
 
+###############
+
 router = APIRouter()
 security = HTTPBearer()  # definisce il tipo di security scheme Bearer
 

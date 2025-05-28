@@ -125,7 +125,21 @@ class PlotSpecies(Base):
     actual_co2_absorption = Column(Float)
     actual_o2_production = Column(Float)
 
+class SpeciesSave(BaseModel):
+    name: str
+    quantity: int
 
+class Centroid(BaseModel):
+    lat: float
+    long: float
+
+class Coordinate(BaseModel):
+    lat: float
+    long: float
+
+class Vertice(BaseModel):
+    lat: float
+    long: float
 # --- WEATHER DATA ---
 class WeatherData(Base):
     __tablename__ = "weather_data"
@@ -153,14 +167,17 @@ class CalcoloResponse(BaseModel):
     o2_giornaliera: float
     dettaglio_per_specie: List[dict]  # Esempio: {"nome": "quercia", "co2": 12.4, "o2": 8.1} (vogliamo farlo così?)
 
-class InserisciRequest(BaseModel):
-    utente: str
-    terreno: List[PlotBase]
-    vegetazione: List[PlotSpeciesBase]
+class SaveCoordinatesRequest(BaseModel):
+    id: int
+    terrainName: str
+    species: list[SpeciesSave]
+    centroid: Centroid
+    vertices: List[Coordinate]
 
 
-class InserisciResponse(BaseModel):
-    esito : str
+class SaveCoordinatesResponse(BaseModel):
+    message : str
+    terrain_id: int
 
 class ClassificaRequest(BaseModel):
     criterio: str

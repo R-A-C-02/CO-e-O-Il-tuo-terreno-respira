@@ -8,60 +8,65 @@ from BackEnd.app.models import Plot, WeatherData
 
 PLOT_ID = "" # VA PRESO TRAMITE UNA CHIAMATA AL FRONTEND
 
-# DB CONNECTION
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+def fetch_and_save_weather(PLOT_ID):
 
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
-session = Session()
+    # DB CONNECTION
+    load_dotenv()
+    DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Recupera solo il plot con quell'ID
-plot = session.query(
-    Plot.id,
-    func.ST_Y(Plot.centroid).label("latitude"),
-    func.ST_X(Plot.centroid).label("longitude")
-).filter(Plot.id == PLOT_ID).first()
+    engine = create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-if not plot:
-    print(f"❌ Nessun plot trovato con ID {PLOT_ID}.")
-    exit()
+    # Recupera solo il plot con quell'ID
+    plot = session.query(
+        Plot.id,
+        func.ST_Y(Plot.centroid).label("latitude"),
+        func.ST_X(Plot.centroid).label("longitude")
+    ).filter(Plot.id == PLOT_ID).first()
 
-plot_id = plot.id
-latitude = plot.latitude
-longitude = plot.longitude
+    if not plot:
+        print(f"❌ Nessun plot trovato con ID {PLOT_ID}.")
+        session.close()
+        return False
 
-params = {
-    "latitude": latitude,
-    "longitude": longitude,
-    "hourly": "temperature_2m,relative_humidity_2m,precipitation,shortwave_radiation"
-}
-url = "https://api.open-meteo.com/v1/forecast"
+    latitude = plot.latitude
+    longitude = plot.longitude
 
-response = requests.get(url, params=params)
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "hourly": "temperature_2m,relative_humidity_2m,precipitation,shortwave_radiation",
+        "forecast_days": "1"
+    }
+    url = "https://api.open-meteo.com/v1/forecast"
 
-if response.status_code != 200:
-    print(f"❌ Errore nella richiesta meteo: {response.status_code}")
-    exit()
+    response = requests.get(url, params=params)
 
-content = response.json()
+    if response.status_code != 200:
+        print(f"❌ Errore nella richiesta meteo: {response.status_code}")
+        session.close()
+        return False
 
-hourly = content["hourly"]
+    content = response.json()
 
-# PARSING & SAVING
-for i in range(len(hourly["time"])):
-    timestamp = datetime.fromisoformat(hourly["time"][i])
-    
-    weather = WeatherData(
-        plot_id = PLOT_ID,
-        date = timestamp.date(),
-        temperature = hourly["temperature_2m"][i],
-        humidity = hourly["relative_humidity_2m"][i],
-        precipitation = hourly["precipitation"][i],
-        solar_radiation = hourly["shortwave_radiation"][i])
-    
-    session.add(weather)
+    hourly = content["hourly"]
 
-session.commit()
-session.close()
-print("✅ Dati meteo salvati nel database.")
+    # PARSING & SAVING
+    for i in range(len(hourly["time"])):
+        timestamp = datetime.fromisoformat(hourly["time"][i])
+        
+        weather = WeatherData(
+            plot_id = PLOT_ID,
+            date = timestamp.date(),
+            temperature = hourly["temperature_2m"][i],
+            humidity = hourly["relative_humidity_2m"][i],
+            precipitation = hourly["precipitation"][i],
+            solar_radiation = hourly["shortwave_radiation"][i])
+        
+        session.add(weather)
+
+    session.commit()
+    session.close()
+    print("✅ Dati meteo salvati nel database.")
+    return True

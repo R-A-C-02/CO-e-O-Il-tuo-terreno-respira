@@ -30,10 +30,11 @@ def recupero_coords_geocentroide():
         latitude = row[2]
 
         diz_centroide[plot_id] = {
+            'plot_id': plot_id,
             'latitudine': latitude,
             'longitudine': longitude
         }
-        print(f"\nPlot ID: {plot_id}, Latitudine: {latitude}, Longitude: {longitude}")
+        #print(f"\nPlot ID: {plot_id}, Latitudine: {latitude}, Longitude: {longitude}")
 
     else:
         print(f"\nNessun plot trovato con id {params['id']}")

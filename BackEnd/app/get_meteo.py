@@ -18,7 +18,7 @@ def fetch_and_save_weather_day(plot_id, lat, lon):
 
     # DB CONNECTION
     load_dotenv()
-    DATABASE_URL = os.getenv("DATABASE_URL")
+    DATABASE_URL = os.getenv("DATABASE_URL_METEO")
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -86,5 +86,3 @@ def fetch_weather_week(lat, lon):
 
     print("✅ Dati meteo settimanali ottenuti.")
     return data
-
-print(fetch_weather_week(latitude, longitude))

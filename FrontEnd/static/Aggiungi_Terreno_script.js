@@ -90,36 +90,61 @@ function calcolaPerimetro(poligono) {
 }
 
 const co2Rates = {
-    quercia: 21,
-    pino: 18,
-    abete: 16,
-    faggio: 16,
-    default: 15
+    quercia: 21.5,
+    pino: 17.2,
+    mais: 2.4,
+    faggio: 19.0,
+    betulla: 18.1,
+    castagno: 22.3,
+    acero: 16.5,
+    olmo: 14.2,
+    pioppo: 23.8,
+    cipresso: 15.6,
+    larice: 20.0,
+    'abete rosso': 18.8, // Nota: nomi con spazi devono essere stringhe
+    'abete bianco': 19.5, // Nota: nomi con spazi devono essere stringhe
+    salice: 12.7,
+    eucalipto: 25.0,
+    tiglio: 17.4,
+    frassino: 16.8,
+    nocciolo: 13.6,
+    ciliegio: 14.4,
+    ulivo: 11.5,
+    grano: 1.7,
+    riso: 2.1,
+    soia: 2.0,
+    girasole: 2.2,
+    barbabietola: 2.8,
+    patata: 1.9,
+    pomodoro: 1.6,
+    lattuga: 0.8,
+    cavolo: 1.3,
+    zucchina: 1.5,
+    melanzana: 1.4,
+    peperone: 1.4,
+    fagiolo: 1.2,
+    pisello: 1.0,
+    cetriolo: 1.3,
+    anguria: 2.5,
+    melone: 2.3,
+    fragola: 0.9,
+    'erba medica': 3.0, // Nota: nomi con spazi devono essere stringhe
+    default: 15 // Mantieni un default se una specie non è nella lista
 };
 
 function stimaCO2(speciesArray, area_ha) {
     let totalCo2 = 0;
-    const defaultRate = co2Rates.default;
+    const DENSITA_IMPLICITA_PER_M2 = 0.01;; //////////////////
 
     speciesArray.forEach(s => {
         const specieKey = s.name.toLowerCase();
-        const rate = co2Rates[specieKey] || defaultRate;
-        const valueMatch = s.quantity.match(/(\d+(\.\d+)?)/);
-        const value = valueMatch ? parseFloat(valueMatch[1]) : 0;
+        const rate = co2Rates[specieKey] || co2Rates.default;
+        const quantityInM2 = s.quantity;
 
-        if (s.quantity.toLowerCase().includes('alberi') || s.quantity.toLowerCase().includes('piante') || s.quantity.toLowerCase().includes('unità')) {
-            totalCo2 += rate * value;
-        } else if (s.quantity.toLowerCase().includes('m²')) {
-            totalCo2 += rate * value * 0.01;
-        } else if (s.quantity.toLowerCase().includes('ha')) {
-            totalCo2 += rate * value * 100;
-        } else if (s.quantity.trim() === '') {
-            totalCo2 += rate * area_ha * 100; // Se la quantità è vuota, si assume che la specie copra tutta l'area del terreno
-        } else {
-            // Caso generico per numeri senza unità specificata (es. si assume "numero di piante")
-            if (!isNaN(value)) { // Controlla se 'value' è un numero valido
-                totalCo2 += rate * value;
-            }
+        if (typeof quantityInM2 === 'number' && quantityInM2 > 0) {
+            // Calcola il numero di "unità di stima" (es. piante) basato sulla densità
+            const numeroUnitaStima = quantityInM2 * DENSITA_IMPLICITA_PER_M2;
+            totalCo2 += rate * numeroUnitaStima;
         }
     });
     return totalCo2.toFixed(2);
@@ -483,7 +508,7 @@ function renderSpeciesListForSelectedTerrain() {
         const li = document.createElement('li');
         li.classList.add('species-item');
         li.innerHTML = `
-            <span>${s.name} (${s.quantity})</span>
+            <span>${s.name} (${s.quantity} m²)</span>
             <div class="species-item-actions">
                 <button onclick="editSpeciesInSelectedTerrain(${index})"><i class="fas fa-edit"></i></button>
                 <button onclick="deleteSpeciesFromSelectedTerrain(${index})"><i class="fas fa-trash"></i></button>
@@ -521,6 +546,20 @@ function addSpeciesToSelectedTerrain() {
 
     // Se il nome è valido (correctlyCasedName non è undefined), procedi
 
+
+    let quantityValue;
+    const rawQuantity = newSpeciesQuantityInput.value;
+    if (rawQuantity.trim() === '') {
+        showCustomAlert("La quantità (m²) è obbligatoria."); newSpeciesQuantityInput.focus(); return;
+    }
+    quantityValue = parseInt(rawQuantity, 10);
+    if (isNaN(quantityValue) || quantityValue < 0 || quantityValue !== parseFloat(rawQuantity)) { // Valida intero non negativo
+        showCustomAlert("Inserisci un valore numerico valido (intero, non negativo) per m².");
+        newSpeciesQuantityInput.value = ""; newSpeciesQuantityInput.focus(); return;
+    }
+
+
+
     if (!selectedTerrenoId) {
         showCustomAlert("Seleziona un terreno prima di aggiungere specie.");
         return;
@@ -539,6 +578,7 @@ function addSpeciesToSelectedTerrain() {
             suggestionsContainer.innerHTML = '';
         }
         renderSpeciesListForSelectedTerrain(); // Aggiorna la lista delle specie
+        updateDashboard();
         showCustomAlert(`Specie "${correctlyCasedName}" aggiunta al terreno "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno' per salvare le modifiche.`);
     }
 }
@@ -567,12 +607,13 @@ function editSpeciesInSelectedTerrain(index) {
         const nameToUse = newCorrectlyCasedName || (newName.trim() === '' ? currentSpecies.name : newName.trim());
 
 
-        showCustomPrompt(`Modifica quantità/densità per "${nameToUse}":`, currentSpecies.quantity, (newQuantity) => {
+        showCustomPrompt(`Modifica quantità (m²) per "${nameToUse}":`, currentSpecies.quantity, (newQuantity) => {
             if (newQuantity === null) return; // Utente ha annullato
 
             if (nameToUse.trim() !== '') {
                 selectedTerreno.species[index] = { name: nameToUse, quantity: newQuantity.trim() };
                 renderSpeciesListForSelectedTerrain();
+                updateDashboard();
                 showCustomAlert(`Specie modificata per "${selectedTerreno.name}". Ricorda di cliccare 'Salva dati terreno'.`);
             } else {
                 showCustomAlert("Il nome della specie non può essere vuoto."); // Non dovrebbe succedere con la logica sopra
@@ -666,17 +707,11 @@ async function saveData() {
         idutente: parseInt(currentUserId), // Assicura che sia un intero
         terrainName: terreno.name,
         //chiedere se effettivamente vogliono di restituire emailutente
-        species: terreno.species.map(s => { // Adatta questo se SpeciesSave ha una struttura diversa
-            let numQuantity = 0;
-            const quantityMatch = s.quantity.match(/(\d+)/); // Estrae il primo gruppo di cifre
-            if (quantityMatch && quantityMatch[0]) {
-                numQuantity = parseInt(quantityMatch[0], 10);
-            }
-            return { 
-                name: s.name, 
-                quantity: numQuantity // Invia l'intero estratto
-            };
-        }),
+        species: terreno.species.map(s => ({ 
+            name: s.name, 
+            quantity: s.quantity // s.quantity è GIA' un intero (m²)
+        })),
+
         centroid: centroidCoords ? { 
             lat: centroidCoords.lat, 
             long: centroidCoords.lng // Mappato lng a long
@@ -979,7 +1014,7 @@ function updateTerreniTable() {
         cell1.textContent = t.name;
         cell1.setAttribute('data-label', 'Nome Terreno'); // Per responsività CSS
         const cell2 = row.insertCell();
-        cell2.textContent = t.species.map(s => `${s.name} (${s.quantity})`).join(', ') || 'N/A';
+        cell2.textContent = t.species.map(s => `${s.name} (${s.quantity}m²)`).join(', ') || 'N/A';
         cell2.setAttribute('data-label', 'Specie');
         const cell3 = row.insertCell();
         cell3.textContent = parseFloat(t.area_ha || 0).toFixed(2); // Formatta a 2 decimali
@@ -991,35 +1026,25 @@ function updateTerreniTable() {
 }
 
 function updateCO2Chart() {
-    const speciesData = {}; // Oggetto per accumulare CO2 per specie
-    terreni.forEach(t => { // Itera su tutti i terreni
-        t.species.forEach(s => {
-            const specieNameLower = s.name.toLowerCase();  // Usa lowercase per la chiave interna
-            if (!specieNameLower) return; // Salta se il nome della specie è vuoto
+    const speciesData = {}; 
+    const DENSITA_IMPLICITA_PER_M2 = 0.01; // Stessa assunzione di densità
 
-            if (!speciesData[s.name]) { // Usa il nome originale (con maiuscole/minuscole corrette) per le etichette
-                speciesData[s.name] = 0;
-            }
-            const valueMatch = s.quantity.match(/(\d+(\.\d+)?)/);
-            const value = valueMatch ? parseFloat(valueMatch[1]) : 0;
-            const rate = co2Rates[specieNameLower] || co2Rates.default; // Usa il nome lowercase per cercare il rate
+    terreni.forEach(t => { 
+        t.species.forEach(s => { // s.quantity è ora un numero (m²)
+            const specieNameOriginal = s.name; 
+            const specieKey = s.name.toLowerCase();
+            const rate = co2Rates[specieKey] || co2Rates.default;
+            const quantityInM2 = s.quantity;
 
-            let co2PerQuestaSpecieNelTerreno = 0;
-            if (s.quantity.toLowerCase().includes('alberi') || s.quantity.toLowerCase().includes('piante') || s.quantity.toLowerCase().includes('unità')) {
-                co2PerQuestaSpecieNelTerreno = rate * value;
-            } else if (s.quantity.toLowerCase().includes('m²')) {
-                co2PerQuestaSpecieNelTerreno = rate * value * 0.0001 * 100; // m² -> ha -> moltiplicatore per rate (che è per albero/ha)
-            } else if (s.quantity.toLowerCase().includes('ha')) {
-                 co2PerQuestaSpecieNelTerreno = rate * value * 100; // Assumendo 100 alberi per ettaro se il rate è per albero
-            } else if (s.quantity.trim() === '' && t.area_ha > 0) {
-                 // Se quantità vuota, usa l'area del terreno, assumendo 100 alberi/ha
-                 co2PerQuestaSpecieNelTerreno = rate * t.area_ha * 100;
-            } else {
-                if (!isNaN(value)) { // Default: numero di piante/alberi
-                    co2PerQuestaSpecieNelTerreno = rate * value;
-                }
+            if (!specieNameOriginal) return;
+            if (!speciesData[specieNameOriginal]) {
+                speciesData[specieNameOriginal] = 0;
             }
-            speciesData[s.name] += co2PerQuestaSpecieNelTerreno;
+            
+            if (typeof quantityInM2 === 'number' && quantityInM2 > 0) {
+                const numeroUnitaStima = quantityInM2 * DENSITA_IMPLICITA_PER_M2;
+                speciesData[specieNameOriginal] += rate * numeroUnitaStima;
+            }
         });
     });
 

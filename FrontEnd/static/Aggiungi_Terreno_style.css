@@ -495,6 +495,7 @@ h4 {
 }
 
 .species-input-group input[type="text"],
+.species-input-group input[type="number"],
 .species-input-group select { /* ANCORA PRESENTE per stili generali se altri select sono usati qui */
     flex: 1; 
     min-width: 0; 
@@ -502,7 +503,8 @@ h4 {
     padding: 10px 12px; 
     border: 1px solid var(--border-color); 
     border-radius: 5px; 
-    font-size: 1em; 
+    font-size: 1em;
+    box-sizing: border-box;  
 }
 
 /* Stili specifici per il nuovo input di testo delle specie */

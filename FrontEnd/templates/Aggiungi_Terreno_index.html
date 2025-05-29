@@ -13,9 +13,10 @@
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="stylesheet" href="static/Aggiungi_Terreno_style.css">
+    <link rel="stylesheet" href="Aggiungi_Terreno_style.css">
 </head>
-<body>
+
+<body data-user-id="{{ user_id }}" data-user-email="{{ email }}"></body>
 
 <header>
     <div class="header-left">
@@ -81,7 +82,12 @@
                 <div class="species-name-input-wrapper" style="flex: 1; position: relative;">
                     <input type="text" id="new-species-name-input" placeholder="Nome specie" style="width: 100%;">
                     <div id="species-suggestions-dropdown"></div> </div>
-                <input type="text" id="new-species-quantity-input" placeholder="es. 10 m²" style="flex: 1;">
+                    
+                <div class="species-quantity-wrapper" style="flex: 1; display: flex; align-items: center;">
+                    <input type="number" id="new-species-quantity-input" placeholder="Quantita es. 10" min="0" style="flex-grow: 1; margin-right: 5px;">
+                    <span class="unit-label" style="white-space: nowrap;">m²</span>
+                </div>
+
                 <button onclick="addSpeciesToSelectedTerrain()" class="add-species-icon-button" title="Aggiungi specie">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="10" fill="#28a745"/>
@@ -157,7 +163,7 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.10.0/leaflet.geometryutil.min.js"></script>
-<script src="static/Aggiungi_Terreno_script.js"></script>
+<script src="Aggiungi_Terreno_script.js"></script>
 
 </body>
 </html>

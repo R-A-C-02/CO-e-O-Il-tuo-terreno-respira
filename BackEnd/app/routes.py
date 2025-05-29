@@ -3,14 +3,14 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from BackEnd.app.auth import create_access_token, decode_access_token
-from BackEnd.app.schemas import UserCreate, UserLogin, UserInsert
+from BackEnd.app.schemas import UserCreate, UserLogin, UserInsert, RenamePlotRequest, DeletePlotRequest
 from BackEnd.app.models import User
 from BackEnd.app.security import hash_password, verify_password
 from BackEnd.app.database import SessionLocal
 from BackEnd.app.get_meteo import fetch_and_save_weather_day, fetch_weather_week
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-
+from BackEnd.app.utils import aggiorna_nome_plot, elimina_plot
 ###############
 
 router = APIRouter()
@@ -102,7 +102,20 @@ async def inserisciterreno(request: Request):
         }
     )
 
-#AggiornamentiDash/DashBoardFinale/
+@router.post("/rename-plot")
+async def rename_plot(payload: RenamePlotRequest):
+    try:
+        return await aggiorna_nome_plot(payload.user_id, payload.old_name, payload.new_name)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/delete-plot")
+async def delete_plot(payload: DeletePlotRequest):
+    try:
+        return await elimina_plot(payload.user_id, payload.plot_name)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.post("/weather/{plot_id}")
 async def fetch_weather(plot_id: str):

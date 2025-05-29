@@ -5,6 +5,8 @@ from geoalchemy2.shape import from_shape
 from shapely.geometry import Polygon, Point
 from sqlalchemy import select
 from BackEnd.app.util.co2_o2_calculator.co2_o2_calculator import get_coefficients_from_db, calculate_co2_o2_hourly
+from sqlalchemy import delete
+
 def calcola_impatti(payload):
     coefficients = get_coefficients_from_db()
 
@@ -68,6 +70,46 @@ async def inserisci_terreno(payload: SaveCoordinatesRequest) -> SaveCoordinatesR
             message="Terreno salvato correttamente",
             terrain_id=plot.id
         )
+
+async def aggiorna_nome_plot(user_id: int, old_name: str, new_name: str) -> dict:
+    async with SessionLocal() as db:
+        # Cerco il plot col nome, e assicuro che appartenga all'utente
+        result = await db.execute(
+            select(Plot)
+            .where(Plot.name == old_name, Plot.user_id == user_id)
+        )
+        plot = result.scalar_one_or_none()
+
+        if not plot:
+            raise ValueError(f"Plot '{old_name}' non trovato per l'utente ID {user_id}")
+
+        # Aggiorna il nome
+        plot.name = new_name
+        await db.commit()
+
+        return {"message": "Nome del terreno aggiornato", "terrain_id": plot.id}
+
+async def elimina_plot(user_id: int, plot_name: str) -> dict:
+    async with SessionLocal() as db:
+        result = await db.execute(
+            select(Plot)
+            .where(Plot.name == plot_name, Plot.user_id == user_id)
+        )
+        plot = result.scalar_one_or_none()
+
+        if not plot:
+            raise ValueError(f"Plot '{plot_name}' non trovato per l'utente ID {user_id}")
+
+        # Elimino prima i record figli se serve (PlotSpecies, WeatherData, ecc.)
+        await db.execute(
+            delete(PlotSpecies).where(PlotSpecies.plot_id == plot.id)
+        )
+
+        # Poi il plot
+        await db.delete(plot)
+        await db.commit()
+
+        return {"message": f"Terreno '{plot_name}' eliminato correttamente"}
 
 def mostra_classifica():
     pass

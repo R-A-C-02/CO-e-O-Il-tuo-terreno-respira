@@ -91,6 +91,14 @@ class PlotOut(PlotBase):
     class Config:
         orm_mode = True
 
+class RenamePlotRequest(BaseModel):
+    user_id: int
+    old_name: str
+    new_name: str
+
+class DeletePlotRequest(BaseModel):
+    user_id: int
+    plot_name: str
 
 # ===== SPECIES =====
 class SpeciesBase(BaseModel):

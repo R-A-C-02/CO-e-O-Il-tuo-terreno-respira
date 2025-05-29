@@ -38,25 +38,7 @@ async def register(request: Request,user: UserCreate, db: AsyncSession = Depends
     await db.commit()
     return {"message": "Registrazione completata"}
 
-# @router.post("/login", response_class=HTMLResponse)
-# async def login(request: Request, user: UserLogin, db: AsyncSession = Depends(get_db)):
-#     result = await db.execute(select(User).where(User.email == user.email))
-#     db_user = result.scalar_one_or_none()
 
-#     if not db_user or not verify_password(user.password, db_user.password):
-#         raise HTTPException(status_code=401, detail="Credenziali non valide")
-
-#     token = create_access_token({"id": db_user.id, "mail": db_user.email})
-
-#     return templates.TemplateResponse(
-#         "AggiornamentiDash/DashBoardFinale/index.html",
-#         {
-#             "request": request,
-#             "user_id": db_user.id,
-#             "email": db_user.email,
-#             "token": token
-#         }
-#     )
 
 @router.post("/login", response_class=HTMLResponse)
 async def login(
@@ -84,23 +66,34 @@ async def login(
     )
 #
 
-@router.post("/inserisciterreno", response_class=HTMLResponse)
-async def inserisciterreno(request: Request):
-    data = await request.json()  # <-- JSON manuale
-    user_id = data.get("id")
-    email = data.get("email")
-        
-    token = create_access_token({"id": user_id, "mail": email})
 
-    return templates.TemplateResponse(
-        "Aggiungi_Terreno_index.html",
-        {
-            "request": request,
-            "user_id": user_id,
-            "email": email,
-            "token": token
-        }
-    )
+from fastapi import Form
+
+@router.post("/inserisciterreno", response_class=HTMLResponse)
+async def inserisciterreno(
+    request: Request,
+    id: str = Form(...),
+    email: str = Form(...)
+):
+    token = create_access_token({"id": id, "mail": email})
+    return templates.TemplateResponse("Aggiungi_Terreno_index.html", {
+        "request": request,
+        "user_id": id,
+        "email": email,
+        "token": token
+    })
+
+@router.post("/todashboard", response_class=HTMLResponse)
+async def dashboard(
+    request: Request,
+    id: str = Form(...),
+):
+    token = create_access_token({"id": id})
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "user_id": id,
+        "token": token
+    })
 
 @router.post("/rename-plot")
 async def rename_plot(payload: RenamePlotRequest):
@@ -123,6 +116,10 @@ async def fetch_weather(plot_id: str):
     if not success:
         raise HTTPException(status_code=404, detail=f"Plot {plot_id} non trovato o errore nella richiesta meteo.")
     return {"detail": "Dati meteo salvati con successo."}
+
+@router.get("/home", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("homepagedefinitiva.html", {"request": request})
 
 #@router.get("/utente-protetto")
 #async def protected_route(

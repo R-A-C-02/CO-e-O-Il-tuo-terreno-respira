@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="stylesheet" href="Aggiungi_Terreno_style.css">
+    <link rel="stylesheet" href="static/Aggiungi_Terreno_style.css">
 </head>
 
 <body data-user-id="{{ user_id }}" data-user-email="{{ email }}"></body>
@@ -28,10 +28,14 @@
         <h1 class="site-title">Airvana</h1>
     </div>
     <div class="user-profile">
-        <a href="../DashBoardFinale/index.html" class="home-icon" title="Torna alla dashboard">
-            <i class="fas fa-home" aria-hidden="true"></i>
-        </a>
-        <span>Er Villa De Ostia</span>
+        <form action="/home" method="get">
+            <button type="submit" ><i class="fas fa-home" aria-hidden="true"></i></button>
+        </form>
+        <form action="/todashboard" method="post">
+        <input type="hidden" name="id" value="{{ user_id }}">
+        <button type="submit" >Dashboard</button>
+      </form>
+       
     </div>
 </header>
 
@@ -165,7 +169,7 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.10.0/leaflet.geometryutil.min.js"></script>
-<script src="Aggiungi_Terreno_script.js"></script>
+<script src="static/Aggiungi_Terreno_script.js"></script>
 
 </body>
 </html>

@@ -416,44 +416,46 @@ exportBtn?.addEventListener('click', async () => {
   });
 //fine pezzo che era in html
 
- document.addEventListener("DOMContentLoaded", () => {
-    // Assumiamo che USER_DATA sia definito globalmente, ad esempio letto da un div nascosto
-    const btn = document.getElementById("inserisci-terreno");
 
-    btn?.addEventListener("click", async (event) => {
-      event.preventDefault();
 
-      if (!window.USER_DATA) {
-        alert("Dati utente mancanti");
-        return;
-      }
 
-      try {
-        const response = await fetch("/inserisciterreno", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: window.USER_DATA.id,
-            email: window.USER_DATA.email,
-          }),
-        });
 
-        if (!response.ok) {
-          throw new Error(`Errore HTTP: ${response.status}`);
-        }
 
-        const html = await response.text();
 
-        // Sostituisci l'intero contenuto della pagina con il template ritornato
-        document.documentElement.innerHTML = html;
 
-      } catch (error) {
-        console.error("Errore durante la richiesta:", error);
-        alert("Errore nella comunicazione col server.");
-      }
-    });
-  });
+
+// window.inserisciTerreno = async function() {
+//     console.log("Bottone cliccato");
+//     console.log("USER_DATA:", window.USER_DATA);
+
+//     if (!window.USER_DATA) {
+//       alert("Dati utente mancanti");
+//       return;
+//     }
+
+//     try {
+//       const response = await fetch("/inserisciterreno", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           id: window.USER_DATA.id,
+//           email: window.USER_DATA.email,
+//         }),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error(`Errore HTTP: ${response.status}`);
+//       }
+
+//       const html = await response.text();
+//       document.documentElement.innerHTML = html;
+
+//     } catch (error) {
+//       console.error("Errore durante la richiesta:", error);
+//       alert("Errore nella comunicazione col server.");
+//     }
+//   };
 
 

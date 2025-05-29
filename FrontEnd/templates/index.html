@@ -22,15 +22,34 @@
   }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script defer src="static/Dashscript.js"></script>
+
 </head>
 <body>
+  <script>
+  // window.USER_DATA = {
+  //   id: "{{ user_id }}",
+  //   email: "{{ email }}"
+  // };
+  function plot(){
+    console.log("Bottone cliccato");
+  }
+
+
+</script>
   <aside class="sidebar" id="sidebar" role="navigation" aria-label="Navigazione principale">
     <button id="toggleSidebar" class="btn btn-light mb-4" aria-label="Toggle menu">☰</button>
     <h4>Dashboard</h4>
     <nav>
-      <a href="homepagedefinitiva.html" aria-label="Home">🏠 <span>Home</span></a>
-      <a href="#" id="inserisci-terreno" aria-label="Aggiungi Terreno">🌱 <span>Aggiungi Terreno</span></a>
+      <form action="/home" method="get">
+            <button type="submit" aria-label="Home">🏠 <span>Home</span></button>
+      </form>
+      
+      <!-- <a href="#" id="inserisci-terreno" aria-label="Aggiungi Terreno">🌱 <span>Aggiungi Terreno</span></a> -->
+      <form action="/inserisciterreno" method="post">
+        <input type="hidden" name="id" value="{{ user_id }}">
+        <input type="hidden" name="email" value="{{ email }}">
+        <button type="submit" class="btn btn-primary">🌱 Aggiungi Terreno</button>
+      </form>
       <a href="#" id="exportLinePDF" class="export-link" aria-label="Esporta PDF">📄 <span>Esporta PDF</span></a>
       <a href="#" aria-label="Impostazioni">⚙️ <span>Impostazioni</span></a>
       <a href="#" aria-label="Aiuto">❓ <span>Aiuto</span></a>
@@ -46,7 +65,10 @@
       <section class="user-info" aria-label="Informazioni utente">
         <button class="btn btn-outline-light" id="themeToggle" aria-label="Cambia tema">🌙</button>
         <div class="user-name">Utente: Maccio Capatonda</div>
-        <button class="logout-btn" aria-label="Logout">Logout</button>
+        <form action="/home" method="get">
+            <button type="submit" class="logout-btn" aria-label="Logout">Logout </button>
+        </form>
+       
       </section>
     </header>
 
@@ -230,9 +252,11 @@ document.getElementById('filterBarChart')?.addEventListener('click', () => {
     </footer>
   </section>
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="static/Dashscript.js" defer></script>
 
 </body>
 </html>

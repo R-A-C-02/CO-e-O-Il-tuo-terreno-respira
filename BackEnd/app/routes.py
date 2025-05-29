@@ -10,7 +10,8 @@ from BackEnd.app.database import SessionLocal
 from BackEnd.app.get_meteo import fetch_and_save_weather_day, fetch_weather_week
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-
+from BackEnd.app.schemas import RenamePlotRequest, DeletePlotRequest
+from BackEnd.app.utils import aggiorna_nome_plot, elimina_plot
 ###############
 
 router = APIRouter()
@@ -90,7 +91,7 @@ async def inserisciterreno(request: Request, user: UserInsert):
     token = create_access_token({"id": user.id, "mail": user.email})
 
     return templates.TemplateResponse(
-        "AggiornamentiDash/DashBoardFinale/Aggiungi_Terreno_index.html",
+        "Aggiungi_Terreno_index.html",
         {
             "request": request,
             "user_id": user.id,
@@ -98,6 +99,20 @@ async def inserisciterreno(request: Request, user: UserInsert):
             "token": token
         }
     )
+
+@router.post("/rename-plot")
+async def rename_plot(payload: RenamePlotRequest):
+    try:
+        return await aggiorna_nome_plot(payload.user_id, payload.old_name, payload.new_name)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/delete-plot")
+async def delete_plot(payload: DeletePlotRequest):
+    try:
+        return await elimina_plot(payload.user_id, payload.plot_name)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.post("/weather/{plot_id}")

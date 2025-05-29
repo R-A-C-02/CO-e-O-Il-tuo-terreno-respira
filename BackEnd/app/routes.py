@@ -3,14 +3,13 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from BackEnd.app.auth import create_access_token, decode_access_token
-from BackEnd.app.schemas import UserCreate, UserLogin, UserInsert
+from BackEnd.app.schemas import UserCreate, UserLogin, UserInsert, RenamePlotRequest, DeletePlotRequest
 from BackEnd.app.models import User
 from BackEnd.app.security import hash_password, verify_password
 from BackEnd.app.database import SessionLocal
 from BackEnd.app.get_meteo import fetch_and_save_weather_day, fetch_weather_week
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from BackEnd.app.schemas import RenamePlotRequest, DeletePlotRequest
 from BackEnd.app.utils import aggiorna_nome_plot, elimina_plot
 ###############
 

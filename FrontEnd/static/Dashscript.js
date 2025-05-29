@@ -330,3 +330,130 @@ window.captureChartCanvas = async (canvasElement) => {
     useCORS: true
   });
 };
+//pezzo che era in html
+  window.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportLinePDF');
+    
+
+exportBtn?.addEventListener('click', async () => {
+  const jsPDF = window.jspdf.jsPDF;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pdfWidth = doc.internal.pageSize.getWidth() - 20;
+  doc.setFont("helvetica", "normal");
+
+  // === Pagina 1: Dati Meteo + Grafico a LINEE ===
+  let yOffset = 10;
+  doc.setFontSize(18);
+  doc.text('1. Dati Meteo Settimanali', 10, yOffset);
+  yOffset += 10;
+
+  const lineChart = document.querySelectorAll('.chart-canvas')[0];
+  if (lineChart) {
+    const image = await html2canvas(lineChart, { scale: 2, useCORS: true });
+    const imgData = image.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, yOffset, pdfWidth, 100);
+  }
+
+  // === Pagina 2: Dati CO2/O2 + Grafico a BARRE ===
+  doc.addPage();
+  let coY = 10;
+  doc.setFontSize(18);
+  doc.text('2. Dati Finali CO₂ e O₂', 10, coY);
+  coY += 10;
+
+  const co2Text = document.getElementById('co2Display')?.textContent || 'CO₂: -- kg';
+  const o2Text = document.getElementById('o2Display')?.textContent || 'O₂: -- kg';
+  doc.setFontSize(12);
+  doc.text(`Assorbimento CO₂ finale: ${co2Text.replace('CO₂: ', '')}`, 10, coY);
+  coY += 6;
+  doc.text(`Emissione O₂ finale: ${o2Text.replace('O₂: ', '')}`, 10, coY);
+
+  const barChart = document.querySelectorAll('.chart-canvas')[1];
+  if (barChart) {
+    const image = await html2canvas(barChart, { scale: 2, useCORS: true });
+    const imgData = image.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, 30, pdfWidth, 100);
+  }
+
+  // === Pagina 3: Dati Piante + Grafico Torta ===
+  doc.addPage();
+  let pieY = 10;
+  doc.setFontSize(18);
+  doc.text('3. Specie Selezionate', 10, pieY);
+  pieY += 10;
+
+  const pieLabels = Array.from(document.querySelectorAll('#plantFilterForm input[type="checkbox"]:checked'))
+    .map(cb => cb.value);
+  const pieChart = Chart.getChart("pieChart");
+  const pieData = pieChart?.data || { labels: [], datasets: [{ data: [] }] };
+
+  const selectedSpecies = pieLabels.map(label => {
+    const index = pieData.labels.indexOf(label);
+    const value = index !== -1 ? pieData.datasets[0].data[index] : '--';
+    return `${label}: ${value}`;
+  });
+
+  doc.setFontSize(12);
+  doc.text(`Numero totale di specie selezionate: ${selectedSpecies.length}`, 10, pieY);
+  pieY += 6;
+
+  const speciesText = doc.splitTextToSize(selectedSpecies.join(', '), 180);
+  doc.setFontSize(10);
+  doc.text(speciesText, 10, pieY);
+  pieY += speciesText.length * 5 + 5;
+
+  const pieCanvas = document.querySelectorAll('.chart-canvas')[2];
+  if (pieCanvas) {
+    const image = await html2canvas(pieCanvas, { scale: 2, useCORS: true });
+    const imgData = image.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, pieY, pdfWidth, 100);
+  }
+
+  doc.save('report_CO2_O2.pdf');
+});
+
+
+  });
+//fine pezzo che era in html
+
+ document.addEventListener("DOMContentLoaded", () => {
+    // Assumiamo che USER_DATA sia definito globalmente, ad esempio letto da un div nascosto
+    const btn = document.getElementById("inserisci-terreno");
+
+    btn?.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      if (!window.USER_DATA) {
+        alert("Dati utente mancanti");
+        return;
+      }
+
+      try {
+        const response = await fetch("/inserisciterreno", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: window.USER_DATA.id,
+            email: window.USER_DATA.email,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Errore HTTP: ${response.status}`);
+        }
+
+        const html = await response.text();
+
+        // Sostituisci l'intero contenuto della pagina con il template ritornato
+        document.documentElement.innerHTML = html;
+
+      } catch (error) {
+        console.error("Errore durante la richiesta:", error);
+        alert("Errore nella comunicazione col server.");
+      }
+    });
+  });
+
+

@@ -85,20 +85,24 @@ async def login(
 #
 
 @router.post("/inserisciterreno", response_class=HTMLResponse)
-async def inserisciterreno(request: Request, user: UserInsert):
-    
-    token = create_access_token({"id": user.id, "mail": user.email})
+async def inserisciterreno(request: Request):
+    data = await request.json()  # <-- JSON manuale
+    user_id = data.get("id")
+    email = data.get("email")
+        
+    token = create_access_token({"id": user_id, "mail": email})
 
     return templates.TemplateResponse(
-        "AggiornamentiDash/DashBoardFinale/Aggiungi_Terreno_index.html",
+        "Aggiungi_Terreno_index.html",
         {
             "request": request,
-            "user_id": user.id,
-            "email": user.email,
+            "user_id": user_id,
+            "email": email,
             "token": token
         }
     )
 
+#AggiornamentiDash/DashBoardFinale/
 
 @router.post("/weather/{plot_id}")
 async def fetch_weather(plot_id: str):

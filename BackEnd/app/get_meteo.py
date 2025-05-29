@@ -10,9 +10,9 @@ from BackEnd.app.parte_finale_connect_db import recupero_coords_geocentroide
 coords = list(recupero_coords_geocentroide().values())
 # {'plot_id': 1, 'latitudine': 41.8902, 'longitudine': 12.4924}
 
-plot_id = coords[0]["plot_id"]
-latitude = coords[0]["latitudine"]
-longitude = coords[0]["longitudine"]
+plot_id = coords[0]
+latitude = coords[1]
+longitude = coords[2]
 
 def fetch_and_save_weather_day(plot_id, lat, lon):
 
@@ -86,3 +86,5 @@ def fetch_weather_week(lat, lon):
 
     print("✅ Dati meteo settimanali ottenuti.")
     return data
+
+print(fetch_weather_week(latitude, longitude))

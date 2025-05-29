@@ -29,7 +29,7 @@ def recupero_coords_geocentroide():
         longitude = row[1]
         latitude = row[2]
 
-        diz_centroide[plot_id] = {
+        diz_centroide = {
             'plot_id': plot_id,
             'latitudine': latitude,
             'longitudine': longitude

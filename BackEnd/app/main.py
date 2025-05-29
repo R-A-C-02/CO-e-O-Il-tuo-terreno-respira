@@ -53,6 +53,10 @@ async def get_classifica(payload: ClassificaRequest):
 async def esporta_pdf(payload: EsportaRequest):
     return await Esporta(payload)
 
+@app.get("/demo", response_class=HTMLResponse)
+async def demo(request: Request):
+    return templates.TemplateResponse("demo.html", {"request": request})
+
 #@app.get("/getmeteo", response_model=MeteoResponse)
 #async def Esporta(payload: MeteoRequest):
 #    return await Esporta(payload)

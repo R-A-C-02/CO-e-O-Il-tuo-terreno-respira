@@ -58,7 +58,7 @@ def fetch_and_save_weather_day(plot_id, lat, lon):
     print("✅ Dati meteo salvati nel database.")
     return True
 
-def fetch_weather_week(plot_id, lat, lon):
+def fetch_weather_week(lat, lon):
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
     "latitude": lat,
@@ -86,4 +86,3 @@ def fetch_weather_week(plot_id, lat, lon):
 
     print("✅ Dati meteo settimanali ottenuti.")
     return data
-

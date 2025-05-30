@@ -4,32 +4,25 @@ from BackEnd.app.database import SessionLocal
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Polygon, Point
 from sqlalchemy import select
-from BackEnd.app.util.co2_o2_calculator.co2_o2_calculator import get_coefficients_from_db, calculate_co2_o2_hourly
+from BackEnd.app.co2_o2_calculator import get_coefficients_from_db, calculate_co2_o2_hourly
 from sqlalchemy import delete
 
-def calcola_impatti(payload):
-    coefficients = get_coefficients_from_db()
 
-    plants = [
-        {
-            "species": s.name.lower(),
-            "quantity": 0,
-            "area_m2": s.surface_area
-        }
-        for s in payload.species
-    ]
-
-    hourly_weather = [{
-        "radiation": 500,
-        "temperature": 20,
-        "humidity": 60
-    }] * 24
-
-    results = calculate_co2_o2_hourly(plants, hourly_weather, coefficients)
-    total_co2 = sum(r["co2_kg_day"] for r in results)
-    total_o2 = sum(r["o2_kg_day"] for r in results)
-    co2o2 = [total_co2, total_o2]
-    return co2o2
+def get_species_distribution_by_plot(plot_id):
+    import psycopg2
+    conn = psycopg2.connect(...)  # Usa la tua stringa di connessione!
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT species.name, plot_species.surface_area
+        FROM plot_species
+        JOIN species ON species.id = plot_species.species_id
+        WHERE plot_species.plot_id = %s
+    """, (plot_id,))
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    # Restituisci una lista di dizionari per il frontend
+    return [{"name": row[0], "surface_area": row[1]} for row in result]
 
 async def inserisci_terreno(payload: SaveCoordinatesRequest) -> SaveCoordinatesResponse:
     async with SessionLocal() as db:

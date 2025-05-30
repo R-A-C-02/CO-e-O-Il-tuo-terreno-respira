@@ -1,7 +1,7 @@
 // Variabile per lo stato di registrazione e per i dati di localizzazione
 let isRegistering = false;
 let currentView = 'login'; // 'login', 'registerChoice', 'registerUser', 'registerCompany'
-let locationData = {}; 
+let locationData = {};
 let currentDropdownFocusIndex = -1; // Indice per la navigazione da tastiera nella dropdown attiva
 
 // Definizioni SVG per le icone mostra/nascondi password
@@ -14,7 +14,7 @@ const hidePasswordSVG = '<svg xmlns="http://www.w3.org/2000/svg" width="18" heig
  */
 async function loadLocationData() {
     try {
-        const response = await fetch('static/province_comuni.json'); 
+        const response = await fetch('static/province_comuni.json');
         if (!response.ok) {
             throw new Error(`Errore HTTP: ${response.status} ${response.statusText}`);
         }
@@ -27,7 +27,7 @@ async function loadLocationData() {
     }
     catch (error) {
         console.error("Errore nel caricamento del file JSON Province_Comuni:", error);
-        locationData = {"Italia": ["Dato non disponibile"]}; 
+        locationData = {"Italia": ["Dato non disponibile"]};
         // Utilizzo di un messaggio personalizzato invece di alert()
         showMessage("Non è stato possibile caricare i dati di province e comuni. Alcune funzionalità potrebbero non essere disponibili.");
     }
@@ -61,7 +61,7 @@ function updateAuthContainerView() {
 
     // Reset delle classi principali del container
     container.classList.remove('shifted');
-    
+
     // Reset delle classi del wrapper dei pannelli di registrazione
     registerPanelWrapper.classList.remove('show-choice', 'show-user-form', 'show-company-form');
 
@@ -105,7 +105,7 @@ function updateAuthContainerView() {
  * Gestisce il cambio di visualizzazione tra form di login e registrazione.
  */
 function toggleAuthView() {
-    isRegistering = !isRegistering; 
+    isRegistering = !isRegistering;
 
     if (isRegistering) {
         currentView = 'registerChoice'; // Passa alla scelta del tipo di registrazione
@@ -173,9 +173,9 @@ function createDropdownItem(item, inputElement, dropdownElement, onSelectItemCal
     const itemDiv = document.createElement('div');
     itemDiv.classList.add('custom-dropdown-item');
     itemDiv.textContent = item;
-    
+
     // Usa 'mousedown' per gestire la selezione prima che l'input perda il focus (evento 'blur')
-    itemDiv.addEventListener('mousedown', (event) => { 
+    itemDiv.addEventListener('mousedown', (event) => {
         event.preventDefault(); // Previene la perdita di focus dall'input
         onSelectItemCallback(item); // Esegue la funzione di callback per la selezione
         hideCustomDropdown(dropdownElement);
@@ -189,11 +189,11 @@ function createDropdownItem(item, inputElement, dropdownElement, onSelectItemCal
  * Mostra la dropdown solo se c'è input e ci sono risultati.
  */
 function populateCustomDropdown(inputElement, dropdownElement, dataArray, onSelectItemCallback) {
-    dropdownElement.innerHTML = ''; 
+    dropdownElement.innerHTML = '';
     const inputValue = inputElement.value.toLowerCase().trim();
     currentDropdownFocusIndex = -1; // Resetta l'indice ad ogni ripopolamento
-    
-    if (!Array.isArray(dataArray)) { 
+
+    if (!Array.isArray(dataArray)) {
          console.warn("populateCustomDropdown: dataArray non è un array.", dataArray);
          hideCustomDropdown(dropdownElement);
          return;
@@ -201,13 +201,13 @@ function populateCustomDropdown(inputElement, dropdownElement, dataArray, onSele
 
     // Filtra i dati solo se l'utente ha digitato qualcosa
     if (inputValue.length > 0) {
-        const filteredData = dataArray.filter(item => 
+        const filteredData = dataArray.filter(item =>
             typeof item === 'string' && item.toLowerCase().startsWith(inputValue) // Filtro "inizia con"
         );
 
         if (filteredData.length > 0) {
             // Mostra al massimo 10 risultati per migliorare performance e UX
-            filteredData.slice(0, 10).forEach(item => { 
+            filteredData.slice(0, 10).forEach(item => {
                 dropdownElement.appendChild(createDropdownItem(item, inputElement, dropdownElement, onSelectItemCallback));
             });
             dropdownElement.classList.add('active'); // Mostra la dropdown
@@ -223,7 +223,7 @@ function populateCustomDropdown(inputElement, dropdownElement, dataArray, onSele
  * Nasconde una dropdown personalizzata e resetta l'indice di navigazione.
  */
 function hideCustomDropdown(dropdownElement) {
-    if (dropdownElement) { 
+    if (dropdownElement) {
         dropdownElement.classList.remove('active');
     }
     currentDropdownFocusIndex = -1; // Resetta l'indice quando la dropdown si nasconde
@@ -239,9 +239,9 @@ function hideCustomDropdown(dropdownElement) {
  */
 function updateLocationDropdowns(provinceInputId, provinceDropdownId, cityInputId, cityDropdownId) {
     const provinceInput = document.getElementById(provinceInputId);
-    const cityInput = document.getElementById(cityInputId); 
+    const cityInput = document.getElementById(cityInputId);
     const provinceDropdown = document.getElementById(provinceDropdownId);
-    const cityDropdown = document.getElementById(cityDropdownId); 
+    const cityDropdown = document.getElementById(cityDropdownId);
 
     if (!provinceInput || !cityInput || !provinceDropdown || !cityDropdown) {
         console.error(`Elementi non trovati per gli ID: ${provinceInputId}, ${cityInputId}, ${provinceDropdownId}, ${cityDropdownId}`);
@@ -254,22 +254,22 @@ function updateLocationDropdowns(provinceInputId, provinceDropdownId, cityInputI
          return;
     }
 
-    const provinceKeys = Object.keys(locationData).sort(); 
+    const provinceKeys = Object.keys(locationData).sort();
     populateCustomDropdown(provinceInput, provinceDropdown, provinceKeys, (selectedProvince) => {
         provinceInput.value = selectedProvince;
-        cityInput.value = ''; 
-        cityInput.disabled = false; 
-        cityInput.placeholder = "Digita e seleziona una città"; 
-        hideCustomDropdown(provinceDropdown); 
-        cityDropdown.innerHTML = ''; 
+        cityInput.value = '';
+        cityInput.disabled = false;
+        cityInput.placeholder = "Digita e seleziona una città";
+        hideCustomDropdown(provinceDropdown);
+        cityDropdown.innerHTML = '';
     });
 
     if (!locationData[provinceInput.value]) {
         cityInput.value = '';
         cityInput.disabled = true;
         cityInput.placeholder = "Seleziona prima una provincia valida";
-        hideCustomDropdown(cityDropdown); 
-        cityDropdown.innerHTML = '';    
+        hideCustomDropdown(cityDropdown);
+        cityDropdown.innerHTML = '';
     }
 
     // Listener per la città
@@ -285,31 +285,31 @@ function updateLocationDropdowns(provinceInputId, provinceDropdownId, cityInputI
             hideCustomDropdown(cityDropdown);
             return;
         }
-        
-        cityInput.placeholder = "Digita e seleziona una città"; 
 
-        const citiesForProvince = locationData[selectedProvince] || []; 
+        cityInput.placeholder = "Digita e seleziona una città";
+
+        const citiesForProvince = locationData[selectedProvince] || [];
         populateCustomDropdown(cityInput, cityDropdown, citiesForProvince.sort(), (selectedCity) => {
             cityInput.value = selectedCity;
-            hideCustomDropdown(cityDropdown); 
+            hideCustomDropdown(cityDropdown);
         });
     };
 
     // Rimuovi i listener esistenti per evitare duplicati prima di aggiungerli
-    cityInput.removeEventListener('input', updateCityDropdown); 
+    cityInput.removeEventListener('input', updateCityDropdown);
     cityInput.addEventListener('input', updateCityDropdown);
 
     // Rimuovi i listener esistenti per evitare duplicati
-    cityInput.removeEventListener('blur', () => {}); 
+    cityInput.removeEventListener('blur', () => {});
     cityInput.addEventListener('blur', () => setTimeout(() => {
-         if (!cityDropdown.matches(':hover') && 
+         if (!cityDropdown.matches(':hover') &&
             (!document.activeElement || !document.activeElement.classList.contains('custom-dropdown-item'))) {
             hideCustomDropdown(cityDropdown);
         }
     }, 200));
 
     // Rimuovi i listener esistenti per evitare duplicati
-    cityInput.removeEventListener('keydown', () => {}); 
+    cityInput.removeEventListener('keydown', () => {});
     cityInput.addEventListener('keydown', (e) => handleDropdownKeyDown(e, cityInput, cityDropdown));
 }
 
@@ -342,7 +342,7 @@ function handleDropdownKeyDown(event, inputElement, dropdownElement) {
             event.preventDefault();
             // Se un item è evidenziato, simula un mousedown per selezionarlo
             if (currentDropdownFocusIndex > -1 && items[currentDropdownFocusIndex]) {
-                items[currentDropdownFocusIndex].dispatchEvent(new Event('mousedown')); 
+                items[currentDropdownFocusIndex].dispatchEvent(new Event('mousedown'));
             }
             break;
         case 'Escape':
@@ -359,7 +359,7 @@ function handleDropdownKeyDown(event, inputElement, dropdownElement) {
 function togglePasswordVisibility(inputId, toggleId) {
     const passwordInput = document.getElementById(inputId);
     const toggleIcon = document.getElementById(toggleId);
-    if (!passwordInput || !toggleIcon) return; 
+    if (!passwordInput || !toggleIcon) return;
 
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
@@ -369,7 +369,7 @@ function togglePasswordVisibility(inputId, toggleId) {
         toggleIcon.innerHTML = hidePasswordSVG;
     }
 }
-        
+
 /**
  * Gestisce la sottomissione dei form di login e registrazione.
  */
@@ -390,43 +390,64 @@ function handleFormSubmit(event) {
             fetch('http://localhost:8000/login', {
                 method: 'POST',
                 body: formData,
+                credentials: 'include',  // 🔑 ESSENZIALE per salvare i cookie!
+            }).then(res => {
+                if (!res.ok) throw new Error("Login fallito");
+                    return res.json();
             })
-            .then(async (res) => {
-                if (!res.ok) {
-                    // Prova a leggere messaggio d'errore dal server
-                    const errorData = await res.json().catch(() => null);
-                    throw new Error(errorData?.detail || 'Errore durante il login');
-                }
-                // Il backend risponde con HTML
-                return res.text();
+            .then(data => {
+                console.log(data.message);
+                window.location.href = "/dashboard";
             })
-            .then(html => {
-                // Puoi fare redirect o sostituire il contenuto della pagina con la risposta HTML
-                // window.location.href = 'index.html'; // se vuoi redirect
-                document.body.innerHTML = html; // oppure aggiorna la pagina con il contenuto ricevuto
-            })
-            .catch(error => {
-                console.error('Errore fetch login:', error);
-                showMessage("Errore di connessione col server o credenziali non valide.");
+            .catch(err => {
+                console.error("Errore:", err);
             });
+
+    // if (form.id === 'loginFormReal') {
+    //     console.log('Tentativo di Login:', data);
+    //     //chiamata alla request
+    //     if (data.loginEmail && data.loginPassword) {
+    //        const formData = new FormData();
+    //        formData.append('loginEmail', data.loginEmail);
+    //        formData.append('loginPassword', data.loginPassword);
+
+    //         fetch('http://localhost:8000/login', {
+    //             method: 'POST',
+    //             body: formData,
+    //         })
+    //         .then(res => {
+    //             if (res.ok) {
+    //                 // ✅ Login riuscito: reindirizza a un'altra pagina
+    //                 window.location.href = "/todashboard";  // oppure "/index", se hai quell’endpoint
+    //             } else {
+    //                 // ❌ Login fallito: mostra l'HTML di errore (opzionale)
+    //                 return res.text().then(html => {
+    //                     document.body.innerHTML = html;
+    //                 });
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Errore fetch login:', error);
+    //             showMessage("Errore di connessione col server o credenziali non valide.");
+    //         });
         } else {
             showMessage("Per favore, inserisci email e password.");
         }
 
     } else if (form.id === 'registerUserForm') {
         console.log('Tentativo di Registrazione Utente:', data);
-        
+
         if (data.registerPassword !== data.registerConfermaPassword) {
             showMessage("Le password non corrispondono.");
             return;
         }
-        
+
         const sessoChecked = document.querySelector('input[name="sesso"]:checked');
         if (!sessoChecked) {
             showMessage("Seleziona il sesso.");
             return;
         }
-        data.sesso = sessoChecked.value; 
+        data.sesso = sessoChecked.value;
 
         const selectedProvince = document.getElementById('province').value;
         const selectedCity = document.getElementById('city').value;
@@ -435,11 +456,11 @@ function handleFormSubmit(event) {
             showMessage("Provincia o Città non valide. Assicurati di selezionarle dalle liste suggerite dopo aver digitare.");
             return;
         }
-        data.province = selectedProvince; 
+        data.province = selectedProvince;
         data.city = selectedCity;
 
-        delete data.provinceInput; 
-        delete data.cityInput;   
+        delete data.provinceInput;
+        delete data.cityInput;
 
         showMessage(`Registrazione Utente completata (simulata) con successo!\nNome: ${data.registerNome} ${data.registerCognome}\nEmail: ${data.registerEmail}\nSesso: ${data.sesso}\nTel: ${data.phonePrefix}${data.phoneNumber}\nIndirizzo: ${data.address}, ${data.city} (${data.province})`);
         // Qui andrebbe la vera logica di registrazione utente
@@ -473,18 +494,18 @@ function handleFormSubmit(event) {
 // Event listener che si attiva quando il DOM è completamente caricato e parsato.
 document.addEventListener('DOMContentLoaded', async () => {
     // Carica i dati di localizzazione prima di inizializzare gli altri componenti
-    await loadLocationData(); 
+    await loadLocationData();
 
     // Ottieni riferimenti ai form e ai bottoni
     const loginForm = document.getElementById('loginFormReal');
     const registerUserForm = document.getElementById('registerUserForm');
     const registerCompanyForm = document.getElementById('registerCompanyForm');
-    
+
     // Aggiungi event listener per il submit dei form
     if (loginForm) loginForm.addEventListener('submit', handleFormSubmit);
     if (registerUserForm) registerUserForm.addEventListener('submit', handleFormSubmit);
     if (registerCompanyForm) registerCompanyForm.addEventListener('submit', handleFormSubmit);
-    
+
     // Resetta i form all'avvio (opzionale, ma buona pratica)
     if (loginForm) loginForm.reset();
     if (registerUserForm) registerUserForm.reset();
@@ -503,7 +524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (registerAsUserButton) registerAsUserButton.addEventListener('click', showUserRegistrationForm);
     if (registerAsCompanyButton) registerAsCompanyButton.addEventListener('click', showCompanyRegistrationForm);
-    if (backToRegisterToggle) backToRegisterToggle.addEventListener('click', toggleAuthView); 
+    if (backToRegisterToggle) backToRegisterToggle.addEventListener('click', toggleAuthView);
     if (backToChoiceUser) backToChoiceUser.addEventListener('click', backToRegisterChoice);
     if (backToChoiceCompany) backToChoiceCompany.addEventListener('click', backToRegisterChoice);
 
@@ -513,13 +534,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const toggleRegisterConfermaPasswordEl = document.getElementById('toggleRegisterConfermaPassword');
 
     if (toggleRegisterPasswordEl) {
-        toggleRegisterPasswordEl.innerHTML = hidePasswordSVG; 
+        toggleRegisterPasswordEl.innerHTML = hidePasswordSVG;
         toggleRegisterPasswordEl.addEventListener('click', () => {
             togglePasswordVisibility('registerPassword', 'toggleRegisterPassword');
         });
     }
     if (toggleRegisterConfermaPasswordEl) {
-        toggleRegisterConfermaPasswordEl.innerHTML = hidePasswordSVG; 
+        toggleRegisterConfermaPasswordEl.innerHTML = hidePasswordSVG;
         toggleRegisterConfermaPasswordEl.addEventListener('click', () => {
             togglePasswordVisibility('registerConfermaPassword', 'toggleRegisterConfermaPassword');
         });
@@ -530,13 +551,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const toggleCompanyConfermaPasswordEl = document.getElementById('toggleCompanyConfermaPassword');
 
     if (toggleCompanyPasswordEl) {
-        toggleCompanyPasswordEl.innerHTML = hidePasswordSVG; 
+        toggleCompanyPasswordEl.innerHTML = hidePasswordSVG;
         toggleCompanyPasswordEl.addEventListener('click', () => {
             togglePasswordVisibility('companyPassword', 'toggleCompanyPassword');
         });
     }
     if (toggleCompanyConfermaPasswordEl) {
-        toggleCompanyConfermaPasswordEl.innerHTML = hidePasswordSVG; 
+        toggleCompanyConfermaPasswordEl.innerHTML = hidePasswordSVG;
         toggleCompanyConfermaPasswordEl.addEventListener('click', () => {
             togglePasswordVisibility('companyConfermaPassword', 'toggleCompanyConfermaPassword');
         });
@@ -545,7 +566,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inizializzazione campo città: disabilitato finché non si sceglie una provincia
     const userCityInput = document.getElementById('city');
     if (userCityInput) {
-        userCityInput.disabled = true; 
+        userCityInput.disabled = true;
         userCityInput.placeholder = "Seleziona prima una provincia";
     }
 
@@ -561,11 +582,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         provinceInput.addEventListener('input', () => updateLocationDropdowns('province', 'provinceDropdown', 'city', 'cityDropdown'));
         provinceInput.addEventListener('blur', () => setTimeout(() => {
             const provinceDropdown = document.getElementById('provinceDropdown');
-            if (provinceDropdown && !provinceDropdown.matches(':hover') && 
+            if (provinceDropdown && !provinceDropdown.matches(':hover') &&
                 (!document.activeElement || !document.activeElement.classList.contains('custom-dropdown-item'))) {
                 hideCustomDropdown(provinceDropdown);
             }
-        }, 200)); 
+        }, 200));
         provinceInput.addEventListener('keydown', (e) => handleDropdownKeyDown(e, provinceInput, document.getElementById('provinceDropdown')));
     }
 

@@ -9,7 +9,7 @@ from BackEnd.app.security import hash_password, verify_password
 from BackEnd.app.database import SessionLocal
 from BackEnd.app.get_meteo import fetch_and_save_weather_day, fetch_weather_week
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from BackEnd.app.utils import aggiorna_nome_plot, elimina_plot
 ###############
 
@@ -39,7 +39,6 @@ async def register(request: Request,user: UserCreate, db: AsyncSession = Depends
     return {"message": "Registrazione completata"}
 
 
-
 @router.post("/login", response_class=HTMLResponse)
 async def login(
     request: Request,
@@ -55,43 +54,51 @@ async def login(
 
     token = create_access_token({"id": db_user.id, "mail": db_user.email})
 
+    # restituisce il token al client invece di restituire la index
+    response = JSONResponse(content={"message": "Login OK"})
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,  # importante: impedisce accesso via JS
+        max_age=1800,   # 30 minuti (esempio)
+        secure=False,   # metti True in produzione (HTTPS)
+        samesite="lax"
+    )
+    return response
+
+
+
+
+@router.post("/inserisciterreno", response_class=HTMLResponse)
+async def inserisciterreno(request: Request):
+    data = await request.json()  # <-- JSON manuale
+    user_id = data.get("id")
+    email = data.get("email")
+        
+    token = create_access_token({"id": user_id, "mail": email})
+
     return templates.TemplateResponse(
-        "index.html",
+        "Aggiungi_Terreno_index.html",
         {
             "request": request,
-            "user_id": db_user.id,
-            "email": db_user.email,
+            "user_id": user_id,
+            "email": email,
             "token": token
         }
     )
-#
 
-
-from fastapi import Form
-
-@router.post("/inserisciterreno", response_class=HTMLResponse)
-async def inserisciterreno(
-    request: Request,
-    id: str = Form(...),
-    email: str = Form(...)
-):
-    token = create_access_token({"id": id, "mail": email})
-    return templates.TemplateResponse("Aggiungi_Terreno_index.html", {
-        "request": request,
-        "user_id": id,
-        "email": email,
-        "token": token
-    })
 
 @router.post("/todashboard", response_class=HTMLResponse)
 async def dashboard(
     request: Request,
     id: str = Form(...),
+    Email: str = Form(...)
 ):
-    token = create_access_token({"id": id})
+    token = create_access_token({"id": id, "email": Email})
     return templates.TemplateResponse("index.html", {
         "request": request,
         "user_id": id,
+        "email": Email,
         "token": token
     })
 

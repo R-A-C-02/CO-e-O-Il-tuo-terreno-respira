@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="static/Aggiungi_Terreno_style.css">
 </head>
 
-<body data-user-id="{{ user_id }}" data-user-email="{{ email }}"></body>
+<body data-user-id="1" data-user-email="user@example.com"></body>
 
 <header>
     <div class="header-left">
@@ -32,7 +32,7 @@
             <button type="submit" ><i class="fas fa-home" aria-hidden="true"></i></button>
         </form>
         <form action="/todashboard" method="post">
-        <input type="hidden" name="id" value="{{ user_id }}">
+        <input type="hidden" name="id" value="1">
         <button type="submit" >Dashboard</button>
       </form>
        

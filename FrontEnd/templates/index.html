@@ -32,8 +32,9 @@
     <button id="toggleSidebar" class="btn btn-light mb-4" aria-label="Toggle menu">☰</button>
     <h4>Dashboard</h4>
     <nav>
-      <a href="#" aria-label="Home">🏠 <span>Home</span></a>
-      <a href="#" aria-label="Aggiungi Terreno">🌱 <span>Aggiungi Terreno</span></a>
+       <!-- class="btn btn-primary" -->
+      <a href="/home"  aria-label="Home">🏠 <span>Home</span></a>  
+      <a href="/inserisciterreno" aria-label="Aggiungi Terreno">🌱 <span>Aggiungi Terreno</span></a>
       <a href="#" id="exportLinePDF" class="export-link" aria-label="Esporta PDF">📄 <span>Esporta PDF</span></a>
       <a href="#" aria-label="Impostazioni">⚙️ <span>Impostazioni</span></a>
       <a href="#" aria-label="Aiuto">❓ <span>Aiuto</span></a>
@@ -92,9 +93,6 @@
         <canvas id="lineChart" class="chart-canvas" width="800" height="400" style="max-width: 100%;" aria-label="Grafico CO₂ e O₂" role="img"></canvas>
         <p id="co2Display">CO₂: -- kg</p>
         <p id="o2Display">O₂: -- kg</p>
-      </article>
-
-      <article class="tickets" aria-labelledby="plants-title">
         <h2 id="plants-title">Tipi di Piante</h2>
         <form class="mb-2" id="plantFilterWrapper">
           <label for="plantFilter">Filtra categorie:</label>
@@ -104,6 +102,10 @@
         <p>Totale Specie: 333</p>
         <p>Distribuzione per categoria</p>
       </article>
+
+      <!-- <article class="tickets" aria-labelledby="plants-title">
+        
+      </article> -->
     </section>
   </main>
 

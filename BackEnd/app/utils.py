@@ -35,7 +35,7 @@ async def inserisci_terreno(payload: SaveCoordinatesRequest) -> SaveCoordinatesR
             name=payload.terrainName,
             user_id=1,  # Sostituisci con ID utente reale
             geom=from_shape(polygon, srid=4326),
-            centroid=from_shape(point, srid=4326),
+            centroid=from_shape(point, srid=4326)
         )
         db.add(plot)
         await db.flush()  # ottieni plot.id

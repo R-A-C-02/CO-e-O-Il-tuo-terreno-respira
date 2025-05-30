@@ -69,38 +69,43 @@ async def login(
 
 
 
-@router.post("/inserisciterreno", response_class=HTMLResponse)
+@router.get("/inserisciterreno", response_class=HTMLResponse)
 async def inserisciterreno(request: Request):
-    data = await request.json()  # <-- JSON manuale
-    user_id = data.get("id")
-    email = data.get("email")
-        
-    token = create_access_token({"id": user_id, "mail": email})
+    return templates.TemplateResponse("Aggiungi_Terreno_index.html",{"request":request})
 
-    return templates.TemplateResponse(
-        "Aggiungi_Terreno_index.html",
-        {
-            "request": request,
-            "user_id": user_id,
-            "email": email,
-            "token": token
-        }
-    )
+#     id: str = Form(),
+#     email: str = Form()
+#     ):
+#    # data = await request.json()  # <-- JSON manuale
+#     # user_id = data.get("id")
+#     # email = data.get("email")
+        
+#     token = create_access_token({"id":id, "mail": email})
+
+#     return templates.TemplateResponse(
+#         "Aggiungi_Terreno_index.html",
+#         {
+#             "request": request,
+#             "user_id": id,
+#             "email": email,
+#             "token": token
+#         }
+#     )
 
 
 @router.post("/todashboard", response_class=HTMLResponse)
-async def dashboard(
-    request: Request,
-    id: str = Form(...),
-    Email: str = Form(...)
-):
-    token = create_access_token({"id": id, "email": Email})
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "user_id": id,
-        "email": Email,
-        "token": token
-    })
+async def dashboard(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+#     id: str = Form(...),
+#     Email: str = Form(...)
+# ):
+#     token = create_access_token({"id": id, "email": Email})
+#     return templates.TemplateResponse("index.html", {
+#         "request": request,
+#         "user_id": id,
+#         "email": Email,
+#         "token": token
+#     })
 
 @router.post("/rename-plot")
 async def rename_plot(payload: RenamePlotRequest):

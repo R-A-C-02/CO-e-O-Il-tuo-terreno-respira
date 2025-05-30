@@ -26,6 +26,10 @@ async function caricaDatiCO2O2(plotId = 1, giorno = "2025-05-29") {
     console.error(error);
   }
 }
+// window.addEventListener('DOMContentLoaded', () => {
+//   console.log("Dashboard JS pronto!");
+//   caricaDatiCO2O2(1, "2025-05-29");
+// });
 
 
 // Funzione per la Pie Chart
@@ -66,6 +70,7 @@ const datiPianteEsempio = [
   { categoria: "Altro", valore: 11 }
 ];
 
+
 async function aggiornaGraficoLine(dati) {
   const labels = dati.map(row => row.datetime.slice(11, 16)); // "HH:MM"
   const co2 = dati.map(row => row.co2_kg_hour);
@@ -102,7 +107,6 @@ async function popolaTabellaMeteo(dati) {
     tbody.appendChild(tr);
   });
 }
-
 // === GESTIONE UI E GRAFICI ===
 window.addEventListener('DOMContentLoaded', () => {
   console.log("Dashboard JS pronto!");

@@ -26,10 +26,10 @@ async function caricaDatiCO2O2(plotId = 1, giorno = "2025-05-29") {
     console.error(error);
   }
 }
-// window.addEventListener('DOMContentLoaded', () => {
-//   console.log("Dashboard JS pronto!");
-//   caricaDatiCO2O2(1, "2025-05-29");
-// });
+window.addEventListener('DOMContentLoaded', () => {
+  console.log("Dashboard JS pronto!");
+  caricaDatiCO2O2(1, "2025-05-29");
+});
 
 
 async function aggiornaGraficoLine(dati) {
@@ -109,7 +109,8 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // Carica i dati reali dal backend appena la pagina è pronta (plot 1, data odierna)
-  caricaDatiCO2O2(1, dataOggi());
+  dataOggi().then(date => caricaDatiCO2O2(1, date));
+
 
   // Gestione bottoni terreno: aggiorna grafico con dati diversi se cliccato
   document.querySelectorAll('#terrainButtons button').forEach(button => {
